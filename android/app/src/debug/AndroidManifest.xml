@@ -4,6 +4,4 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <!-- Lets debug builds reach the local Next.js server over http (10.0.2.2:3000). -->
-    <application android:usesCleartextTraffic="true"/>
 </manifest>

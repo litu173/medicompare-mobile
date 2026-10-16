@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import '../api.dart';
@@ -288,6 +289,7 @@ class _SignedOut extends StatelessWidget {
           trailing: const Icon(Icons.chevron_right),
           onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TrackScreen())),
         ),
+        const _ServerTile(),
       ]),
       if (device.orders.isNotEmpty) ...[
         const SizedBox(height: 20),
@@ -440,6 +442,7 @@ class _SignedInState extends State<_SignedIn> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TrackScreen())),
           ),
+          const _ServerTile(),
           ListTile(
             leading: const Icon(Icons.logout, color: Brand.danger),
             title: const Text('Sign out', style: TextStyle(color: Brand.danger)),
@@ -577,6 +580,146 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                 FilledButton(onPressed: _busy ? null : _save, child: const Text('Save address')),
               ]),
             ),
+    );
+  }
+}
+
+// ───────────────────────────── Server address ─────────────────────────────
+
+class _ServerTile extends StatelessWidget {
+  const _ServerTile();
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    leading: const Icon(Icons.dns_outlined),
+    title: const Text('Server address'),
+    subtitle: Text(Uri.parse(context.watch<ServerModel>().address).authority),
+    trailing: const Icon(Icons.chevron_right),
+    onTap: () => openServerSettings(context),
+  );
+}
+
+void openServerSettings(BuildContext context) =>
+    Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => const ServerSettingsScreen()));
+
+/// Lets a tester point the app at their own backend, e.g. http://192.168.1.20:3000 on the same Wi-Fi.
+class ServerSettingsScreen extends StatefulWidget {
+  const ServerSettingsScreen({super.key});
+
+  @override
+  State<ServerSettingsScreen> createState() => _ServerSettingsScreenState();
+}
+
+class _ServerSettingsScreenState extends State<ServerSettingsScreen> {
+  late final _controller = TextEditingController(text: apiBase);
+  String? _error, _ok;
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  /// Checks that the address answers like a MediCompare server before saving it. Resetting to the built-in
+  /// default skips the check, since that address (emulator/simulator host) is unreachable from a real phone.
+  Future<void> _save(String input, {bool test = true}) async {
+    final url = normalizeServerAddress(input);
+    if (url == null) {
+      setState(() => _error = 'Enter an address like http://192.168.1.20:3000');
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _error = null;
+      _ok = null;
+    });
+    if (test) {
+      try {
+        final res = await http.get(Uri.parse('$url/api/v1/meta')).timeout(const Duration(seconds: 8));
+        if (res.statusCode != 200 || !res.body.contains('divisions')) {
+          throw Exception('Reached $url but it did not answer like a MediCompare server (HTTP ${res.statusCode}).');
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _busy = false;
+            _error = e is Exception && e.toString().startsWith('Exception: Reached')
+                ? e.toString().substring(11)
+                : 'Could not connect to $url. Is the server running, and is this phone on the same Wi-Fi?';
+          });
+        }
+        return;
+      }
+    }
+    if (!mounted) return;
+    final changed = url != apiBase;
+    if (changed) {
+      // Sessions belong to one server; sign out locally and reload reference data.
+      await context.read<AuthModel>().forget();
+      if (!mounted) return;
+      context.read<MetaModel>().reset();
+    }
+    await context.read<ServerModel>().set(url);
+    if (!mounted) return;
+    _controller.text = apiBase;
+    context.read<MetaModel>().get().ignore();
+    if (changed) context.read<AuthModel>().load();
+    setState(() {
+      _busy = false;
+      _ok = test ? 'Connected to ${Uri.parse(apiBase).authority}.' : 'Using the default server.';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final server = context.watch<ServerModel>();
+    return Scaffold(
+      appBar: AppBar(title: const Text('Server address')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          const Muted(
+            'The MediCompare server this app talks to. To test on a phone, run the website on your computer and enter '
+            "its address on your Wi-Fi, e.g. http://192.168.1.20:3000 (find the IP in your computer's network settings).",
+            size: 14,
+          ),
+          const SizedBox(height: 16),
+          _ErrorText(_error),
+          if (_ok != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: Brand.c50, borderRadius: BorderRadius.circular(12)),
+              child: Text(_ok!, style: const TextStyle(color: Brand.c700, fontSize: 14)),
+            ),
+          TextField(
+            controller: _controller,
+            keyboardType: TextInputType.url,
+            autocorrect: false,
+            decoration: const InputDecoration(labelText: 'Server address', hintText: 'http://192.168.1.20:3000'),
+            onSubmitted: _busy ? null : _save,
+          ),
+          const SizedBox(height: 16),
+          FilledButton(
+            onPressed: _busy ? null : () => _save(_controller.text),
+            child: _busy
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                  )
+                : const Text('Test & save'),
+          ),
+          if (server.isCustom) ...[
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: _busy ? null : () => _save(defaultApiBase, test: false),
+              child: Text('Reset to default (${Uri.parse(defaultApiBase).authority})'),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

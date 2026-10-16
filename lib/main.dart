@@ -6,8 +6,11 @@ import 'screens/shell.dart';
 import 'state.dart';
 import 'theme.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Load the saved server address before anything talks to the API.
+  final server = ServerModel();
+  await server.load();
   final api = Api();
   final auth = AuthModel(api)..load();
   final cart = CartModel()..load();
@@ -17,6 +20,7 @@ void main() {
   runApp(MultiProvider(
     providers: [
       Provider.value(value: api),
+      ChangeNotifierProvider.value(value: server),
       ChangeNotifierProvider.value(value: auth),
       ChangeNotifierProvider.value(value: cart),
       ChangeNotifierProvider.value(value: device),
@@ -35,6 +39,7 @@ class MediCompareApp extends StatelessWidget {
         title: 'MediCompare BD',
         debugShowCheckedModeBanner: false,
         theme: buildTheme(),
-        home: const Shell(),
+        // A new server address rebuilds the shell so every tab reloads from the new backend.
+        home: Shell(key: ValueKey(context.watch<ServerModel>().address)),
       );
 }

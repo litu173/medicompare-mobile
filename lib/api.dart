@@ -6,13 +6,29 @@ import 'package:http/http.dart' as http;
 
 import 'models.dart';
 
-/// Backend origin. Override with `--dart-define=API_BASE=https://…`.
+/// Built-in backend origin: `--dart-define=API_BASE=…`, else the emulator/simulator host.
 /// The Android emulator reaches the host machine at 10.0.2.2; the iOS simulator uses localhost.
-String get apiBase {
+String get defaultApiBase {
   const fromEnv = String.fromEnvironment('API_BASE');
   if (fromEnv.isNotEmpty) return fromEnv;
   if (!kIsWeb && Platform.isAndroid) return 'http://10.0.2.2:3000';
   return 'http://localhost:3000';
+}
+
+/// Server address chosen in Settings (saved on the device), overriding [defaultApiBase].
+String? apiBaseOverride;
+
+/// Backend origin used for every request.
+String get apiBase => apiBaseOverride ?? defaultApiBase;
+
+/// Normalises user input like "192.168.1.20:3000" to "http://192.168.1.20:3000"; null if it isn't a usable URL.
+String? normalizeServerAddress(String input) {
+  var s = input.trim();
+  if (s.isEmpty) return null;
+  if (!s.contains('://')) s = 'http://$s';
+  final u = Uri.tryParse(s);
+  if (u == null || !(u.scheme == 'http' || u.scheme == 'https') || u.host.isEmpty) return null;
+  return Uri(scheme: u.scheme, host: u.host, port: u.hasPort ? u.port : null).toString();
 }
 
 /// Absolute URL for a server media path such as `/media/products/x.jpg`.

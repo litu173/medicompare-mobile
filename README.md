@@ -12,6 +12,22 @@ cd ../mobile && flutter run       # iOS simulator uses localhost:3000, Android e
 flutter run --dart-define=API_BASE=https://your-host   # any other backend
 ```
 
+## Test on an Android phone
+
+1. Download and install the APK (allow "Install unknown apps" for your browser when Android asks):
+   `https://github.com/<owner>/<repo>/releases/download/latest-android/medicompare.apk`
+2. On your computer, run the website so other devices can reach it (`npm run dev -- -H 0.0.0.0` in `../web`) and
+   find its Wi-Fi IP (macOS: System Settings → Wi-Fi → Details → IP address).
+3. With the phone on the same Wi-Fi, open the app → **Account → Server address**, enter e.g.
+   `http://192.168.1.20:3000`, and tap **Test & save**. If the app can't reach a server, the error screen also
+   links to this setting.
+
+The APK is built by `.github/workflows/android-release.yml` on every push to `main` and replaces the asset on the
+rolling `latest-android` release. Without signing secrets it uses a throwaway debug key, so each new build must be
+installed after uninstalling the old one. For in-place updates, add repository secrets `ANDROID_KEYSTORE_BASE64`,
+`ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD` (the workflow writes
+`android/key.properties`, which is git-ignored). Release builds allow plain `http://` so LAN testing works.
+
 ## Structure
 
 - `lib/api.dart` — `/api/v1` client; sends the session token as `Authorization: Bearer`

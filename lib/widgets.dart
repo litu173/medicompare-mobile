@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'api.dart';
 import 'format.dart';
 import 'models.dart';
+import 'screens/account.dart';
 import 'screens/catalog.dart';
 import 'state.dart';
 import 'theme.dart';
@@ -145,6 +146,13 @@ class ErrorView extends StatelessWidget {
                 const SizedBox(height: 12),
                 TextButton(onPressed: onRetry, child: const Text('Try again')),
               ],
+              // Can't reach the server at all: offer to change its address (e.g. a LAN IP on a real phone).
+              if (error is ApiException && (error as ApiException).status == 0)
+                TextButton.icon(
+                  onPressed: () => openServerSettings(context),
+                  icon: const Icon(Icons.dns_outlined, size: 18),
+                  label: Text('Server address: ${Uri.parse(apiBase).authority}'),
+                ),
             ],
           ),
         ),

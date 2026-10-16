@@ -62,6 +62,9 @@ class AuthModel extends ChangeNotifier {
     await _adopt(r.token, r.user);
   }
 
+  /// Forgets the session without contacting the server (used when switching servers).
+  Future<void> forget() => _clear();
+
   Future<void> logout() async {
     try {
       await api.logout();
@@ -202,6 +205,11 @@ class MetaModel extends ChangeNotifier {
   Meta? meta;
   Future<Meta>? _pending;
 
+  void reset() {
+    meta = null;
+    _pending = null;
+  }
+
   Future<Meta> get() {
     if (meta != null) return Future.value(meta);
     return _pending ??= api.meta().then((m) {
@@ -209,6 +217,31 @@ class MetaModel extends ChangeNotifier {
       notifyListeners();
       return m;
     }).whenComplete(() => _pending = null);
+  }
+}
+
+/// Backend address chosen on the device (Settings → Server address); null uses the built-in default.
+class ServerModel extends ChangeNotifier {
+  static const _key = 'server_address';
+  SharedPreferences? _prefs;
+
+  String get address => apiBase;
+  bool get isCustom => apiBaseOverride != null;
+
+  Future<void> load() async {
+    _prefs = await SharedPreferences.getInstance();
+    apiBaseOverride = _prefs!.getString(_key);
+  }
+
+  /// Saves [url] (already normalised), or clears the override when null.
+  Future<void> set(String? url) async {
+    apiBaseOverride = url == defaultApiBase ? null : url;
+    if (apiBaseOverride == null) {
+      await _prefs?.remove(_key);
+    } else {
+      await _prefs?.setString(_key, apiBaseOverride!);
+    }
+    notifyListeners();
   }
 }
 
