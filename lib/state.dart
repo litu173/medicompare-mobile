@@ -248,10 +248,54 @@ class ServerModel extends ChangeNotifier {
 /// Which bottom tab is showing; lets screens jump to the cart or account tab.
 class TabsModel extends ChangeNotifier {
   int index = 0;
+
+  /// Bumped when Home asks the Search tab to focus its field.
+  int searchFocusRequest = 0;
+
   void go(int i) {
     index = i;
     notifyListeners();
   }
 
-  static const home = 0, search = 1, companies = 2, cart = 3, account = 4;
+  void focusSearch() {
+    searchFocusRequest++;
+    go(search);
+  }
+
+  static const home = 0, search = 1, cart = 2, orders = 3, account = 4;
+}
+
+/// Lifetime savings for this customer (account orders plus guest orders placed on this device).
+class SavingsModel extends ChangeNotifier {
+  SavingsModel(this.api, this.device);
+  final Api api;
+  final DeviceOrders device;
+  Savings savings = const Savings.none();
+
+  Future<void> refresh() async {
+    try {
+      savings = await api.savings(device.orders);
+      notifyListeners();
+    } catch (_) {
+      // Offline or server unreachable: keep the last known value.
+    }
+  }
+}
+
+/// First-launch onboarding flag.
+class OnboardingModel extends ChangeNotifier {
+  static const _key = 'onboarded_v1';
+  SharedPreferences? _prefs;
+  bool done = true;
+
+  Future<void> load() async {
+    _prefs = await SharedPreferences.getInstance();
+    done = _prefs!.getBool(_key) ?? false;
+  }
+
+  void finish() {
+    done = true;
+    _prefs?.setBool(_key, true);
+    notifyListeners();
+  }
 }

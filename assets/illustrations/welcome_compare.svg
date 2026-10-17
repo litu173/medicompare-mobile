@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 260">
+  <!-- soft backdrop -->
+  <ellipse cx="160" cy="236" rx="132" ry="14" fill="#04241C" opacity=".08"/>
+  <circle cx="200" cy="112" r="96" fill="#E6F5EE"/>
+  <circle cx="276" cy="48" r="10" fill="#C9A45C" opacity=".5"/>
+  <circle cx="44" cy="70" r="6" fill="#7FE0BF"/>
+  <!-- big phone -->
+  <rect x="168" y="40" width="112" height="190" rx="20" fill="#04241C"/>
+  <rect x="176" y="52" width="96" height="168" rx="13" fill="#FFFFFF"/>
+  <rect x="186" y="64" width="76" height="10" rx="5" fill="#ECE6D8"/>
+  <!-- card 1 : pricey -->
+  <rect x="186" y="84" width="76" height="40" rx="9" fill="#FBE7E3"/>
+  <rect x="194" y="93" width="20" height="22" rx="5" fill="#E98A7A"/>
+  <rect x="220" y="95" width="34" height="6" rx="3" fill="#A3402E" opacity=".6"/>
+  <rect x="220" y="106" width="22" height="6" rx="3" fill="#A3402E" opacity=".35"/>
+  <!-- card 2 : cheapest -->
+  <rect x="186" y="132" width="76" height="40" rx="9" fill="#E6F5EE" stroke="#0A7C60" stroke-width="2"/>
+  <rect x="194" y="141" width="20" height="22" rx="5" fill="#0A7C60"/>
+  <rect x="220" y="143" width="34" height="6" rx="3" fill="#0A7C60" opacity=".7"/>
+  <rect x="220" y="154" width="22" height="6" rx="3" fill="#0A7C60" opacity=".4"/>
+  <circle cx="258" cy="134" r="11" fill="#C9A45C"/>
+  <path d="M253 134l4 4 7-8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="186" y="182" width="76" height="24" rx="12" fill="#0A7C60"/>
+  <rect x="204" y="191" width="40" height="6" rx="3" fill="#FFFFFF" opacity=".9"/>
+  <!-- woman in hijab -->
+  <path d="M70 232c0-46 12-78 44-78s44 32 44 78z" fill="#0A7C60"/>
+  <path d="M86 170c8 10 20 14 28 14s20-4 28-14" fill="none" stroke="#086450" stroke-width="3" opacity=".5"/>
+  <circle cx="114" cy="118" r="30" fill="#7FE0BF"/>
+  <path d="M84 120c0-22 14-34 30-34s30 12 30 34c0 8-2 18-6 26l-48 0c-4-8-6-18-6-26z" fill="#4E7AC7"/>
+  <ellipse cx="114" cy="122" rx="20" ry="23" fill="#C68642"/>
+  <circle cx="106" cy="119" r="2.4" fill="#2B1B12"/>
+  <circle cx="122" cy="119" r="2.4" fill="#2B1B12"/>
+  <path d="M106 131c5 5 11 5 16 0" fill="none" stroke="#2B1B12" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="101" cy="127" r="3.5" fill="#E98A7A" opacity=".45"/>
+  <circle cx="127" cy="127" r="3.5" fill="#E98A7A" opacity=".45"/>
+  <!-- arm pointing to phone -->
+  <path d="M146 176c14-6 22-16 30-30" fill="none" stroke="#0A7C60" stroke-width="16" stroke-linecap="round"/>
+  <circle cx="178" cy="142" r="9" fill="#C68642"/>
+  <!-- sparkles -->
+  <path d="M60 120l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#C9A45C"/>
+  <path d="M292 182l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#0A7C60"/>
+</svg>

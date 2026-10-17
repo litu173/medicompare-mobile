@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'api.dart';
+import 'screens/onboarding.dart';
 import 'screens/shell.dart';
 import 'state.dart';
 import 'theme.dart';
@@ -14,8 +15,15 @@ Future<void> main() async {
   final api = Api();
   final auth = AuthModel(api)..load();
   final cart = CartModel()..load();
-  final device = DeviceOrders()..load();
+  final device = DeviceOrders();
   final meta = MetaModel(api)..get().ignore();
+  final onboarding = OnboardingModel();
+  await onboarding.load();
+  await device.load();
+  final savings = SavingsModel(api, device);
+  // Recount savings whenever the signed-in user changes (including the initial session restore).
+  auth.addListener(() => savings.refresh());
+  savings.refresh().ignore();
 
   runApp(MultiProvider(
     providers: [
@@ -25,6 +33,8 @@ Future<void> main() async {
       ChangeNotifierProvider.value(value: cart),
       ChangeNotifierProvider.value(value: device),
       ChangeNotifierProvider.value(value: meta),
+      ChangeNotifierProvider.value(value: onboarding),
+      ChangeNotifierProvider.value(value: savings),
       ChangeNotifierProvider(create: (_) => TabsModel()),
     ],
     child: const MediCompareApp(),
@@ -40,6 +50,8 @@ class MediCompareApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: buildTheme(),
         // A new server address rebuilds the shell so every tab reloads from the new backend.
-        home: Shell(key: ValueKey(context.watch<ServerModel>().address)),
+        home: context.watch<OnboardingModel>().done
+            ? Shell(key: ValueKey(context.watch<ServerModel>().address))
+            : const OnboardingScreen(),
       );
 }

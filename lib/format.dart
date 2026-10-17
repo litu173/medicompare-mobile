@@ -33,6 +33,12 @@ String formatDate(DateTime d, {bool time = true}) {
   return '$date, $h:${d.minute.toString().padLeft(2, '0')} ${d.hour < 12 ? 'am' : 'pm'}';
 }
 
+/// "17 Oct, 11:45 am" for timelines.
+String formatShort(DateTime d) {
+  final h = d.hour % 12 == 0 ? 12 : d.hour % 12;
+  return '${d.day} ${_months[d.month - 1]}, $h:${d.minute.toString().padLeft(2, '0')} ${d.hour < 12 ? 'am' : 'pm'}';
+}
+
 final bdPhone = RegExp(r'^(?:\+?88)?01[3-9]\d{8}$');
 
 String normalizePhone(String s) => s.replaceAll(RegExp(r'[\s-]'), '');

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 260">
+  <ellipse cx="160" cy="238" rx="140" ry="13" fill="#04241C" opacity=".08"/>
+  <circle cx="110" cy="120" r="100" fill="#E6F5EE"/>
+  <!-- road -->
+  <rect x="0" y="222" width="320" height="6" rx="3" fill="#ECE6D8"/>
+  <!-- door + customer (right) -->
+  <rect x="226" y="86" width="74" height="140" rx="6" fill="#FFFFFF" stroke="#ECE6D8" stroke-width="3"/>
+  <rect x="236" y="98" width="54" height="128" rx="4" fill="#C9A45C" opacity=".35"/>
+  <circle cx="282" cy="160" r="3" fill="#9A7A3C"/>
+  <path d="M232 236c0-38 10-62 32-62s32 24 32 62z" fill="#0A7C60"/>
+  <ellipse cx="264" cy="148" rx="17" ry="20" fill="#E0AC69"/>
+  <path d="M246 146c0-18 8-26 18-26s19 8 19 24c-5-7-12-9-19-9s-13 4-18 11z" fill="#2B1B12"/>
+  <circle cx="258" cy="148" r="2" fill="#1A120C"/><circle cx="270" cy="148" r="2" fill="#1A120C"/>
+  <path d="M257 157c4 4 10 4 14 0" fill="none" stroke="#1A120C" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M236 190c-10-10-14-22-14-34" fill="none" stroke="#0A7C60" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="222" cy="152" r="7" fill="#E0AC69"/>
+  <!-- scooter -->
+  <circle cx="58" cy="210" r="18" fill="#04241C"/><circle cx="58" cy="210" r="7" fill="#ECE6D8"/>
+  <circle cx="160" cy="210" r="18" fill="#04241C"/><circle cx="160" cy="210" r="7" fill="#ECE6D8"/>
+  <path d="M48 196h64l20-30h22l14 44H96z" fill="#0A7C60"/>
+  <path d="M150 166l-8-26h18" fill="none" stroke="#04241C" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- delivery box -->
+  <rect x="34" y="150" width="48" height="44" rx="8" fill="#C9A45C"/>
+  <path d="M34 166h48M58 150v44" stroke="#9A7A3C" stroke-width="3"/>
+  <!-- rider -->
+  <path d="M90 196c0-30 10-52 30-52s28 18 28 40" fill="#4E7AC7"/>
+  <circle cx="120" cy="118" r="20" fill="#7FE0BF"/>
+  <path d="M100 116a20 20 0 0 1 40 0z" fill="#0A7C60"/>
+  <rect x="98" y="114" width="44" height="6" rx="3" fill="#04241C"/>
+  <ellipse cx="120" cy="126" rx="13" ry="12" fill="#8D5524"/>
+  <circle cx="115" cy="125" r="1.8" fill="#1A120C"/><circle cx="125" cy="125" r="1.8" fill="#1A120C"/>
+  <path d="M115 131c3 3 7 3 10 0" fill="none" stroke="#1A120C" stroke-width="2" stroke-linecap="round"/>
+  <path d="M136 160l14 6" stroke="#4E7AC7" stroke-width="12" stroke-linecap="round"/>
+  <!-- motion + location pin -->
+  <path d="M10 180h22M4 196h20M14 166h16" stroke="#7FE0BF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M206 44c-12 0-20 9-20 20 0 15 20 32 20 32s20-17 20-32c0-11-8-20-20-20z" fill="#E98A7A"/>
+  <circle cx="206" cy="64" r="7" fill="#fff"/>
+</svg>

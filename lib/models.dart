@@ -268,8 +268,12 @@ class Meta {
       : divisions = (j['divisions'] as Json).map((k, v) => MapEntry(k, (v as List).cast<String>())),
         thanas = ((j['thanas'] as Json?) ?? {}).map((k, v) => MapEntry(k, (v as List).cast<String>())),
         paymentMethods = (j['paymentMethods'] as List).map((e) => PaymentMethod.fromJson(e)).toList(),
-        freeDeliveryOver = _d(j['delivery']?['freeOver']) ?? 1000;
+        freeDeliveryOver = _d(j['delivery']?['freeOver']) ?? 1000,
+        supportPhone = _s(j['supportPhone']);
   final Map<String, List<String>> divisions;
+
+  /// Pharmacist help line set by the store admin (null when not configured).
+  final String? supportPhone;
 
   /// Thanas (areas) per district; empty until the server provides them, in which case area is free text.
   final Map<String, List<String>> thanas;
@@ -289,6 +293,7 @@ class QuoteLine {
         lineTotal = _d(j['lineTotal']) ?? 0,
         available = _b(j['available']),
         maxQty = _i(j['maxQty']),
+        image = _s(j['image']),
         cheaper = j['cheaper'] == null
             ? null
             : (
@@ -296,12 +301,24 @@ class QuoteLine {
                 brandName: j['cheaper']['brandName'] as String,
                 manufacturer: j['cheaper']['manufacturer'] as String,
                 savePct: _i(j['cheaper']['savePct']),
+                packId: (j['cheaper']['packId'] as num?)?.toInt(),
+                packLabel: _s(j['cheaper']['packLabel']),
+                price: _d(j['cheaper']['price']),
               );
   final int packId, medicineId, qty, maxQty;
   final String brandName, description, packLabel;
   final double price, lineTotal;
   final bool available;
-  final ({int medicineId, String brandName, String manufacturer, int savePct})? cheaper;
+  final String? image;
+  final ({
+    int medicineId,
+    String brandName,
+    String manufacturer,
+    int savePct,
+    int? packId,
+    String? packLabel,
+    double? price,
+  })? cheaper;
 }
 
 class Quote {
@@ -343,10 +360,12 @@ class OrderItem {
         description = _s(j['description']) ?? '',
         packLabel = _s(j['pack_label']) ?? '',
         unitPrice = _d(j['unit_price']) ?? 0,
-        qty = _i(j['qty']);
+        qty = _i(j['qty']),
+        image = _s(j['image']);
   final int medicineId, qty;
   final String brandName, description, packLabel;
   final double unitPrice;
+  final String? image;
 }
 
 class OrderDetail {
@@ -420,4 +439,19 @@ class Address {
   String get oneLine => '$line, $area, $district';
 
   static List<Address> listFrom(Object? v) => (v as List? ?? []).map((e) => Address.fromJson(e)).toList();
+}
+
+/// Money saved versus the typical price of the same medicines (median of all equivalent brands).
+class Savings {
+  Savings.fromJson(Json j)
+      : total = _d(j['total']) ?? 0,
+        orders = _i(j['orders']),
+        byOrder = ((j['byOrder'] as Json?) ?? {}).map((k, v) => MapEntry(k, (v as num).toDouble()));
+  const Savings.none()
+      : total = 0,
+        orders = 0,
+        byOrder = const {};
+  final double total;
+  final int orders;
+  final Map<String, double> byOrder;
 }

@@ -6,6 +6,16 @@ Android and iOS client for the Next.js backend in `../web`. Same screens as the 
 by equivalence, cheapest first), Product, Generic, Companies, Cart, Checkout (guest or account, COD), Order
 confirmation/tracking, Login/Register and Account.
 
+## Design & features
+
+- **Look:** emerald-and-ivory "luxury" theme with gold accents (see `lib/theme.dart`), Fraunces for headings and prices, Plus Jakarta Sans for UI and Hind Siliguri for Bangla (via `google_fonts`), soft cards and a floating bottom bar.
+- **Illustrations:** custom vector scenes of Bangladeshi customers in `assets/illustrations/` (onboarding, empty states, order success, community).
+- **Onboarding:** three slides on first launch.
+- **Savings tracker:** money saved against the typical price (the median of equivalent brands), from `POST /api/v1/savings`. Shown on Home, Orders and Account, with a Share button.
+- **Switch & save:** in the cart, one tap (or "Switch all") swaps an item for its cheapest in-stock equivalent.
+- **Ordering:** searchable pickers for division, district and thana. A vertical order tracker with times, a call button for the rider, and a "Talk to a pharmacist" option when the store sets a help line.
+- **Sharing:** invite your family through the system share sheet.
+
 ## Run
 
 ```bash

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 220">
+  <ellipse cx="140" cy="206" rx="96" ry="9" fill="#04241C" opacity=".1"/>
+  <circle cx="140" cy="104" r="88" fill="#E6F5EE"/>
+  <!-- confetti -->
+  <rect x="40" y="40" width="10" height="5" rx="2" transform="rotate(30 45 42)" fill="#C9A45C"/>
+  <rect x="226" y="54" width="10" height="5" rx="2" transform="rotate(-20 231 56)" fill="#E98A7A"/>
+  <rect x="62" y="110" width="9" height="5" rx="2" transform="rotate(-35 66 112)" fill="#4E7AC7"/>
+  <rect x="210" y="122" width="9" height="5" rx="2" transform="rotate(40 214 124)" fill="#0A7C60"/>
+  <circle cx="96" cy="24" r="4" fill="#7FE0BF"/><circle cx="190" cy="22" r="4" fill="#C9A45C"/>
+  <path d="M236 92l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#C9A45C"/>
+  <!-- happy customer with parcel, arms up -->
+  <path d="M104 204c0-40 14-66 36-66s36 26 36 66z" fill="#E98A7A"/>
+  <path d="M110 160c-14-12-24-30-26-48" fill="none" stroke="#E98A7A" stroke-width="13" stroke-linecap="round"/>
+  <path d="M170 160c14-12 24-30 26-48" fill="none" stroke="#E98A7A" stroke-width="13" stroke-linecap="round"/>
+  <circle cx="84" cy="108" r="8" fill="#C68642"/><circle cx="196" cy="108" r="8" fill="#C68642"/>
+  <ellipse cx="140" cy="108" rx="21" ry="24" fill="#C68642"/>
+  <path d="M117 112c-2-24 9-36 23-36s25 12 23 36c-4-14-13-21-23-21s-19 7-23 21z" fill="#2B1B12"/>
+  <path d="M130 106q3-4 6 0M144 106q3-4 6 0" fill="none" stroke="#1A120C" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M129 117c6 8 16 8 22 0" fill="#fff" stroke="#1A120C" stroke-width="2.2" stroke-linecap="round"/>
+  <!-- parcel -->
+  <rect x="118" y="160" width="44" height="34" rx="6" fill="#C9A45C"/>
+  <path d="M118 172h44M140 160v34" stroke="#9A7A3C" stroke-width="3"/>
+  <circle cx="140" cy="166" r="9" fill="#0A7C60"/>
+  <path d="M135 166l3 3 6-6" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

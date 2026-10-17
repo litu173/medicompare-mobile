@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 170">
+  <ellipse cx="170" cy="160" rx="150" ry="8" fill="#04241C" opacity=".08"/>
+  <!-- elder with cap -->
+  <path d="M22 162c0-34 10-56 30-56s30 22 30 56z" fill="#ECE6D8"/>
+  <ellipse cx="52" cy="84" rx="16" ry="18" fill="#8D5524"/>
+  <path d="M37 79c0-11 7-17 15-17s15 6 15 17z" fill="#FFFFFF" stroke="#D9CFB8" stroke-width="1.5"/>
+  <path d="M42 96c6 8 14 8 20 0v8c-6 8-14 8-20 0z" fill="#ECE6D8"/>
+  <circle cx="46" cy="86" r="1.8" fill="#1A120C"/><circle cx="58" cy="86" r="1.8" fill="#1A120C"/>
+  <path d="M47 92c3 3 7 3 10 0" fill="none" stroke="#1A120C" stroke-width="2" stroke-linecap="round"/>
+  <!-- young woman -->
+  <path d="M92 162c0-34 10-56 30-56s30 22 30 56z" fill="#0A7C60"/>
+  <path d="M102 120c10 14 20 28 26 42" stroke="#C9A45C" stroke-width="6"/>
+  <ellipse cx="122" cy="84" rx="16" ry="18" fill="#E0AC69"/>
+  <path d="M104 92c-2-22 7-32 18-32s20 10 18 32c-3-12-10-18-18-18s-15 6-18 18z" fill="#2B1B12"/>
+  <circle cx="116" cy="86" r="1.8" fill="#1A120C"/><circle cx="128" cy="86" r="1.8" fill="#1A120C"/>
+  <path d="M116 94c4 4 8 4 12 0" fill="none" stroke="#1A120C" stroke-width="2" stroke-linecap="round"/>
+  <!-- man -->
+  <path d="M162 162c0-34 10-56 30-56s30 22 30 56z" fill="#4E7AC7"/>
+  <ellipse cx="192" cy="84" rx="16" ry="18" fill="#C68642"/>
+  <path d="M176 82c0-14 7-22 16-22s17 8 17 20c-5-6-11-8-17-8s-11 3-16 10z" fill="#2B1B12"/>
+  <circle cx="186" cy="86" r="1.8" fill="#1A120C"/><circle cx="198" cy="86" r="1.8" fill="#1A120C"/>
+  <path d="M186 94c4 4 8 4 12 0" fill="none" stroke="#1A120C" stroke-width="2" stroke-linecap="round"/>
+  <!-- woman in hijab -->
+  <path d="M232 162c0-34 10-56 30-56s30 22 30 56z" fill="#E98A7A"/>
+  <path d="M244 92c0-18 8-28 18-28s18 10 18 28c0 6-2 12-4 16h-28c-2-4-4-10-4-16z" fill="#7FE0BF"/>
+  <ellipse cx="262" cy="88" rx="12" ry="14" fill="#8D5524"/>
+  <circle cx="257" cy="87" r="1.8" fill="#1A120C"/><circle cx="267" cy="87" r="1.8" fill="#1A120C"/>
+  <path d="M257 94c3 3 7 3 10 0" fill="none" stroke="#1A120C" stroke-width="2" stroke-linecap="round"/>
+  <!-- child -->
+  <path d="M296 162c0-22 7-36 20-36s20 14 20 36z" fill="#C9A45C"/>
+  <ellipse cx="316" cy="110" rx="12" ry="13" fill="#E0AC69"/>
+  <path d="M304 108c0-10 6-15 12-15s12 5 12 14c-4-4-8-5-12-5s-8 2-12 6z" fill="#2B1B12"/>
+  <circle cx="312" cy="111" r="1.5" fill="#1A120C"/><circle cx="320" cy="111" r="1.5" fill="#1A120C"/>
+  <path d="M312 116c2 2 6 2 8 0" fill="none" stroke="#1A120C" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- hearts -->
+  <path d="M150 22c0-6 8-8 10-2 2-6 10-4 10 2 0 6-10 12-10 12s-10-6-10-12z" fill="#E98A7A"/>
+  <path d="M84 30c0-4 5-5 6-1 1-4 6-3 6 1 0 4-6 8-6 8s-6-4-6-8z" fill="#C9A45C"/>
+  <path d="M236 26c0-4 5-5 6-1 1-4 6-3 6 1 0 4-6 8-6 8s-6-4-6-8z" fill="#0A7C60"/>
+</svg>

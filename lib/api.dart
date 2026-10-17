@@ -117,6 +117,9 @@ class Api {
       (await post('/orders', body)) as Map<String, dynamic>;
   Future<List<OrderSummary>> orders() async =>
       ((await get('/orders'))['orders'] as List).map((e) => OrderSummary.fromJson(e)).toList();
+  Future<Savings> savings(List<({String code, String phone})> guest) async => Savings.fromJson(await post('/savings', {
+        'orders': [for (final o in guest) {'code': o.code, 'phone': o.phone}],
+      }));
   Future<OrderDetail> order(String code, {String? phone}) async =>
       OrderDetail.fromJson(await get('/orders/${Uri.encodeComponent(code)}', {'phone': phone}));
 

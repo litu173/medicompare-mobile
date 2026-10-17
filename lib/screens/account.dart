@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
+import '../actions.dart';
 import '../api.dart';
 import '../format.dart';
 import '../models.dart';
@@ -13,18 +14,22 @@ import 'shop.dart';
 // ───────────────────────────── Login / Register ─────────────────────────────
 
 class _AuthScaffold extends StatelessWidget {
-  const _AuthScaffold({required this.title, required this.subtitle, required this.children});
-  final String title, subtitle;
+  const _AuthScaffold({required this.title, required this.subtitle, required this.children, this.art = 'community'});
+  final String title, subtitle, art;
   final List<Widget> children;
 
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(),
-        body: ListView(padding: const EdgeInsets.all(20), children: [
-          Text(title, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 4),
-          Muted(subtitle, size: 15),
+        body: ListView(padding: const EdgeInsets.fromLTRB(24, 0, 24, 40), children: [
+          Center(child: Illustration(art, height: 130)),
           const SizedBox(height: 20),
+          const Wordmark(size: 22),
+          const SizedBox(height: 10),
+          Text(title, style: Txt.display(32, weight: FontWeight.w600)),
+          const SizedBox(height: 6),
+          Muted(subtitle, size: 15),
+          const SizedBox(height: 24),
           ...children,
         ]),
       );
@@ -39,9 +44,13 @@ class _ErrorText extends StatelessWidget {
       ? const SizedBox.shrink()
       : Container(
           margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(color: const Color(0xFFFEF2F2), borderRadius: BorderRadius.circular(12)),
-          child: Text(text!, style: const TextStyle(color: Color(0xFF991B1B), fontSize: 14)),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(color: const Color(0xFFFFEFEA), borderRadius: BorderRadius.circular(16)),
+          child: Row(children: [
+            const Icon(Icons.error_outline_rounded, color: Brand.danger, size: 20),
+            const SizedBox(width: 10),
+            Expanded(child: Text(text!, style: Txt.ui(14, color: Brand.danger, weight: FontWeight.w600))),
+          ]),
         );
 }
 
@@ -96,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
                   autofillHints: const [AutofillHints.email],
-                  decoration: const InputDecoration(labelText: 'Email'),
+                  decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.mail_outline_rounded)),
                   validator: (v) => (v ?? '').contains('@') ? null : 'Enter your email',
                 ),
                 const SizedBox(height: 12),
@@ -104,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _password,
                   obscureText: true,
                   autofillHints: const [AutofillHints.password],
-                  decoration: const InputDecoration(labelText: 'Password'),
+                  decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock_outline_rounded)),
                   validator: (v) => (v ?? '').isEmpty ? 'Enter your password' : null,
                   onFieldSubmitted: (_) => _submit(),
                 ),
@@ -174,7 +183,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) => _AuthScaffold(
         title: 'Create an account',
-        subtitle: 'Faster checkout, saved addresses and order history.',
+        subtitle: 'See how much you save, track orders and check out faster.',
+        art: 'welcome_save',
         children: [
           _ErrorText(_error),
           Form(
@@ -185,7 +195,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _name,
                   textCapitalization: TextCapitalization.words,
                   autofillHints: const [AutofillHints.name],
-                  decoration: const InputDecoration(labelText: 'Full name'),
+                  decoration: const InputDecoration(labelText: 'Full name', prefixIcon: Icon(Icons.person_outline_rounded)),
                   validator: (v) => (v ?? '').trim().length < 2 ? 'Please enter your name' : null,
                 ),
                 const SizedBox(height: 12),
@@ -194,7 +204,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
                   autofillHints: const [AutofillHints.email],
-                  decoration: const InputDecoration(labelText: 'Email'),
+                  decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.mail_outline_rounded)),
                   validator: (v) =>
                       RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch((v ?? '').trim()) ? null : 'Enter a valid email',
                 ),
@@ -203,7 +213,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _phone,
                   keyboardType: TextInputType.phone,
                   autofillHints: const [AutofillHints.telephoneNumber],
-                  decoration: const InputDecoration(labelText: 'Mobile number (optional)', hintText: '01XXXXXXXXX'),
+                  decoration: const InputDecoration(
+                      labelText: 'Mobile number (optional)', hintText: '01XXXXXXXXX', prefixIcon: Icon(Icons.phone_outlined)),
                   validator: (v) {
                     final p = normalizePhone(v ?? '');
                     return p.isEmpty || bdPhone.hasMatch(p) ? null : 'Enter a valid Bangladeshi mobile number (01XXXXXXXXX)';
@@ -214,7 +225,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _password,
                   obscureText: true,
                   autofillHints: const [AutofillHints.newPassword],
-                  decoration: const InputDecoration(labelText: 'Password (8+ characters)'),
+                  decoration: const InputDecoration(labelText: 'Password (8+ characters)', prefixIcon: Icon(Icons.lock_outline_rounded)),
                   validator: (v) => (v ?? '').length < 8 ? 'Password must be at least 8 characters' : null,
                 ),
               ]),
@@ -244,7 +255,7 @@ class AccountScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(user == null ? 'Account' : 'My account')),
       body: !auth.ready
-          ? const Center(child: CircularProgressIndicator())
+          ? const SkeletonList(count: 3)
           : user == null
               ? const _SignedOut()
               : _SignedIn(key: ValueKey(user.id), user: user),
@@ -252,61 +263,91 @@ class AccountScreen extends StatelessWidget {
   }
 }
 
+/// Shortcuts shared by signed-in and signed-out accounts.
+class _Shortcuts extends StatelessWidget {
+  const _Shortcuts({this.signOut = false});
+  final bool signOut;
+
+  @override
+  Widget build(BuildContext context) {
+    final support = context.watch<MetaModel>().meta?.supportPhone;
+    return ListPanel(children: [
+      if (support != null)
+        _MenuTile(Icons.support_agent_rounded, 'Talk to a pharmacist', 'Ask before switching brands', () => callNumber(context, support)),
+      _MenuTile(Icons.favorite_border_rounded, 'Invite your family', 'Help them pay a fair price too', () => shareApp(context)),
+      _MenuTile(Icons.local_shipping_outlined, 'Track an order', null,
+          () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TrackScreen()))),
+      const _ServerTile(),
+      if (signOut)
+        ListTile(
+          leading: const _MenuIcon(Icons.logout_rounded, danger: true),
+          title: Text('Sign out', style: Txt.ui(15, weight: FontWeight.w700, color: Brand.danger)),
+          onTap: () => context.read<AuthModel>().logout(),
+        ),
+    ]);
+  }
+}
+
+class _MenuIcon extends StatelessWidget {
+  const _MenuIcon(this.icon, {this.danger = false});
+  final IconData icon;
+  final bool danger;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(color: danger ? const Color(0xFFFFEFEA) : Brand.c50, borderRadius: BorderRadius.circular(12)),
+        child: Icon(icon, size: 20, color: danger ? Brand.danger : Brand.c600),
+      );
+}
+
+class _MenuTile extends StatelessWidget {
+  const _MenuTile(this.icon, this.title, this.subtitle, this.onTap);
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+        leading: _MenuIcon(icon),
+        title: Text(title),
+        subtitle: subtitle == null ? null : Text(subtitle!),
+        trailing: const Icon(Icons.chevron_right_rounded),
+        onTap: onTap,
+      );
+}
+
 class _SignedOut extends StatelessWidget {
   const _SignedOut();
 
   @override
-  Widget build(BuildContext context) {
-    final device = context.watch<DeviceOrders>();
-    return ListView(padding: const EdgeInsets.all(16), children: [
-      Panel(
-        padding: const EdgeInsets.all(20),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          const Icon(Icons.account_circle_outlined, size: 48, color: Brand.c600),
-          const SizedBox(height: 8),
-          const Text('Sign in to Sashroy',
-              textAlign: TextAlign.center, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 4),
-          const Muted('Track orders, save addresses and check out faster. Guest checkout works too.',
-              size: 14, align: TextAlign.center),
-          const SizedBox(height: 16),
-          FilledButton(
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LoginScreen())),
-            child: const Text('Sign in'),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RegisterScreen())),
-            child: const Text('Create an account'),
-          ),
-        ]),
-      ),
-      const SizedBox(height: 16),
-      ListPanel(children: [
-        ListTile(
-          leading: const Icon(Icons.local_shipping_outlined, color: Brand.c600),
-          title: const Text('Track an order'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TrackScreen())),
-        ),
-        const _ServerTile(),
-      ]),
-      if (device.orders.isNotEmpty) ...[
-        const SizedBox(height: 20),
-        const SectionHeader('Orders on this device'),
-        ListPanel(children: [
-          for (final o in device.orders)
-            ListTile(
-              title: Text(o.code, style: const TextStyle(fontFamily: 'Menlo', fontWeight: FontWeight.w600)),
-              subtitle: Text(o.phone),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (_) => OrderScreen(code: o.code, phone: o.phone))),
+  Widget build(BuildContext context) => ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 120), children: [
+        Panel(
+          padding: const EdgeInsets.all(22),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            const Center(child: Illustration('community', height: 110)),
+            const SizedBox(height: 16),
+            Text('Join Sashroy', textAlign: TextAlign.center, style: Txt.display(28, weight: FontWeight.w600)),
+            const SizedBox(height: 6),
+            const Muted('See your savings, track orders and save addresses. Guest checkout works too.',
+                size: 14, align: TextAlign.center),
+            const SizedBox(height: 18),
+            FilledButton(
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LoginScreen())),
+              child: const Text('Sign in'),
             ),
-        ]),
-      ],
-    ]);
-  }
+            const SizedBox(height: 10),
+            OutlinedButton(
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RegisterScreen())),
+              child: const Text('Create an account'),
+            ),
+          ]),
+        ),
+        const SizedBox(height: 18),
+        const _Shortcuts(),
+      ]);
 }
 
 class _SignedIn extends StatefulWidget {
@@ -318,18 +359,12 @@ class _SignedIn extends StatefulWidget {
 }
 
 class _SignedInState extends State<_SignedIn> {
-  late Future<(List<OrderSummary>, List<Address>)> _data = _load();
-
-  Future<(List<OrderSummary>, List<Address>)> _load() async {
-    final api = context.read<Api>();
-    final r = await Future.wait([api.orders(), api.addresses()]);
-    return (r[0] as List<OrderSummary>, r[1] as List<Address>);
-  }
+  late Future<List<Address>> _addresses = context.read<Api>().addresses();
 
   Future<void> _reload() async {
-    final f = _load();
-    setState(() => _data = f);
-    await f.catchError((_) => (<OrderSummary>[], <Address>[]));
+    final f = context.read<Api>().addresses();
+    setState(() => _addresses = f);
+    await Future.wait([f.catchError((_) => <Address>[]), context.read<SavingsModel>().refresh()]);
   }
 
   Future<void> _delete(Address a) async {
@@ -354,101 +389,107 @@ class _SignedInState extends State<_SignedIn> {
   }
 
   Future<void> _add() async {
-    final saved = await Navigator.of(context, rootNavigator: true)
-        .push<bool>(MaterialPageRoute(builder: (_) => const AddressFormScreen()));
+    final saved = await Navigator.of(context, rootNavigator: true).push<bool>(MaterialPageRoute(builder: (_) => const AddressFormScreen()));
     if (saved == true) _reload();
   }
 
   @override
   Widget build(BuildContext context) {
     final u = widget.user;
+    final savings = context.watch<SavingsModel>().savings;
     return RefreshIndicator(
       onRefresh: _reload,
-      child: ListView(padding: const EdgeInsets.all(16), children: [
-        Panel(
-          child: Row(children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundColor: Brand.c100,
-              child: Text(u.name.isEmpty ? '?' : u.name[0].toUpperCase(),
-                  style: const TextStyle(color: Brand.c700, fontWeight: FontWeight.w700, fontSize: 20)),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(u.name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
-                Muted(u.email, size: 14),
-                if (u.phone != null) Muted(u.phone!, size: 14),
+      child: ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 120), children: [
+        NightCard(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Container(
+                width: 56,
+                height: 56,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(gradient: Brand.goldGradient, shape: BoxShape.circle),
+                child: Text(u.name.isEmpty ? '?' : u.name[0].toUpperCase(), style: Txt.display(26, color: Brand.night, weight: FontWeight.w600)),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(u.name, style: Txt.display(22, color: Colors.white, weight: FontWeight.w600)),
+                  Text(u.email, style: Txt.ui(13, color: Colors.white.withValues(alpha: 0.7))),
+                  if (u.phone != null) Text(u.phone!, style: Txt.ui(13, color: Colors.white.withValues(alpha: 0.7))),
+                ]),
+              ),
+            ]),
+            const SizedBox(height: 18),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              ),
+              child: Row(children: [
+                const Icon(Icons.savings_outlined, color: Brand.gold2),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('SAVED WITH SASHROY', style: Txt.eyebrow(color: Brand.gold2)),
+                    PriceText(savings.total, size: 22, color: Colors.white),
+                  ]),
+                ),
+                if (savings.total >= 1)
+                  TextButton(
+                    onPressed: () => shareSavings(context, savings.total),
+                    style: TextButton.styleFrom(foregroundColor: Brand.gold2),
+                    child: const Text('Share'),
+                  ),
               ]),
             ),
           ]),
         ),
-        const SizedBox(height: 20),
-        FutureBuilder(
-          future: _data,
+        const SizedBox(height: 18),
+        Panel(
+          onTap: () => context.read<TabsModel>().go(TabsModel.orders),
+          child: Row(children: [
+            const _MenuIcon(Icons.receipt_long_rounded),
+            const SizedBox(width: 14),
+            Expanded(child: Text('My orders', style: Txt.ui(15, weight: FontWeight.w800))),
+            const Icon(Icons.chevron_right_rounded),
+          ]),
+        ),
+        const SizedBox(height: 24),
+        FutureBuilder<List<Address>>(
+          future: _addresses,
           builder: (context, snap) {
             if (snap.connectionState != ConnectionState.done) {
-              return const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()));
+              return const Padding(padding: EdgeInsets.all(20), child: Center(child: CircularProgressIndicator()));
             }
             if (snap.hasError) return ErrorView(snap.error!, onRetry: _reload);
-            final (orders, addresses) = snap.data!;
+            final addresses = snap.data!;
             return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              const SectionHeader('My orders'),
-              if (orders.isEmpty)
-                const Panel(child: Muted('No orders yet.', size: 14))
-              else
-                ListPanel(children: [
-                  for (final o in orders)
-                    ListTile(
-                      title: Text(o.code, style: const TextStyle(fontFamily: 'Menlo', fontWeight: FontWeight.w600)),
-                      subtitle: Text(
-                          '${formatDate(o.createdAt, time: false)} · ${o.itemCount} item${o.itemCount == 1 ? '' : 's'} · ${taka(o.total)}'),
-                      trailing: StatusBadge(o.status),
-                      onTap: () =>
-                          Navigator.of(context).push(MaterialPageRoute(builder: (_) => OrderScreen(code: o.code))),
-                    ),
-                ]),
-              const SizedBox(height: 20),
               SectionHeader('Saved addresses', trailing: addresses.isEmpty ? null : '${addresses.length}'),
               ListPanel(children: [
                 for (final a in addresses)
                   ListTile(
+                    leading: const _MenuIcon(Icons.place_outlined),
                     title: Row(children: [
-                      Flexible(child: Text(a.name, style: const TextStyle(fontWeight: FontWeight.w600))),
+                      Flexible(child: Text(a.name)),
                       if (a.isDefault) const Padding(padding: EdgeInsets.only(left: 6), child: Tag('Default')),
                     ]),
                     subtitle: Text('${a.oneLine}\n${a.phone}'),
                     isThreeLine: true,
-                    trailing: IconButton(
-                      tooltip: 'Delete address',
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () => _delete(a),
-                    ),
+                    trailing: IconButton(tooltip: 'Delete address', icon: const Icon(Icons.delete_outline_rounded), onPressed: () => _delete(a)),
                   ),
                 ListTile(
-                  leading: const Icon(Icons.add_location_alt_outlined, color: Brand.c600),
-                  title: const Text('Add an address', style: TextStyle(color: Brand.c700, fontWeight: FontWeight.w500)),
+                  leading: const _MenuIcon(Icons.add_location_alt_outlined),
+                  title: Text('Add an address', style: Txt.ui(15, weight: FontWeight.w700, color: Brand.c700)),
                   onTap: _add,
                 ),
               ]),
             ]);
           },
         ),
-        const SizedBox(height: 20),
-        ListPanel(children: [
-          ListTile(
-            leading: const Icon(Icons.local_shipping_outlined),
-            title: const Text('Track an order'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TrackScreen())),
-          ),
-          const _ServerTile(),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Brand.danger),
-            title: const Text('Sign out', style: TextStyle(color: Brand.danger)),
-            onTap: () => context.read<AuthModel>().logout(),
-          ),
-        ]),
+        const SizedBox(height: 24),
+        const _Shortcuts(signOut: true),
       ]),
     );
   }
@@ -535,31 +576,30 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                   validator: (v) => bdPhone.hasMatch(normalizePhone(v ?? '')) ? null : 'Enter a valid mobile number',
                 ),
                 const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  initialValue: _division,
-                  decoration: const InputDecoration(labelText: 'Division'),
-                  items: [for (final d in meta.divisions.keys) DropdownMenuItem(value: d, child: Text(d))],
-                  validator: (v) => v == null ? 'Choose a division' : null,
+                PickerField(
+                  label: 'Division',
+                  icon: Icons.map_outlined,
+                  options: meta.divisions.keys.toList(),
+                  value: _division,
+                  errorText: 'Choose a division',
                   onChanged: (v) => setState(() {
                     _division = v;
                     _district = null;
+                    _area.clear();
                   }),
                 ),
                 const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  key: ValueKey(_division),
-                  initialValue: _district,
-                  decoration: const InputDecoration(labelText: 'District'),
-                  items: [
-                    for (final d in meta.divisions[_division] ?? const <String>[]) DropdownMenuItem(value: d, child: Text(d)),
-                  ],
-                  validator: (v) => v == null ? 'Choose a district' : null,
-                  onChanged: _division == null
-                      ? null
-                      : (v) => setState(() {
-                            _district = v;
-                            if (meta.thanas[v]?.isNotEmpty ?? false) _area.clear();
-                          }),
+                PickerField(
+                  label: 'District',
+                  icon: Icons.location_city_outlined,
+                  options: meta.divisions[_division] ?? const <String>[],
+                  value: _district,
+                  enabled: _division != null,
+                  errorText: 'Choose a district',
+                  onChanged: (v) => setState(() {
+                    _district = v;
+                    if (meta.thanas[v]?.isNotEmpty ?? false) _area.clear();
+                  }),
                 ),
                 const SizedBox(height: 12),
                 ThanaField(thanas: meta.thanas[_district] ?? const [], controller: _area),
@@ -591,7 +631,7 @@ class _ServerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListTile(
-    leading: const Icon(Icons.dns_outlined),
+    leading: const _MenuIcon(Icons.dns_outlined),
     title: const Text('Server address'),
     subtitle: Text(Uri.parse(context.watch<ServerModel>().address).authority),
     trailing: const Icon(Icons.chevron_right),
