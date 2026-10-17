@@ -5,7 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'format.dart';
 
 /// Public landing page with the app download and the web store link.
-const landingUrl = 'https://litu173.github.io/medicompare/';
+const landingUrl = 'https://litu173.github.io/sashroy/';
 
 /// Invites family and friends: the whole point is that more people find the cheaper equivalent.
 Future<void> shareApp(BuildContext context) => SharePlus.instance.share(ShareParams(

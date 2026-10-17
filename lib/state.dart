@@ -227,7 +227,7 @@ class MetaModel extends ChangeNotifier {
 class ServerModel extends ChangeNotifier {
   static const _key = 'server_address';
   static const _manualKey = 'server_manual';
-  static const discoveryUrl = 'https://litu173.github.io/medicompare/config.js';
+  static const discoveryUrl = 'https://litu173.github.io/sashroy/config.js';
   SharedPreferences? _prefs;
 
   /// True when the address was typed by hand; automatic discovery is then skipped.
