@@ -388,7 +388,9 @@ class UpdateModel extends ChangeNotifier {
   bool checking = false;
   String? error;
 
-  bool get available => latestBuild > currentBuild && currentBuild > 0;
+  /// Only Android installs the APK; iPhone updates will come through the App Store.
+  bool get available =>
+      defaultTargetPlatform == TargetPlatform.android && latestBuild > currentBuild && currentBuild > 0;
 
   Future<void> loadCurrent(String version, String build) async {
     currentVersion = version;
