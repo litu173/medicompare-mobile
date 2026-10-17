@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'api.dart';
@@ -220,10 +221,17 @@ class MetaModel extends ChangeNotifier {
   }
 }
 
-/// Backend address chosen on the device (Settings → Server address); null uses the built-in default.
+/// Backend address. By default the app finds the live store link automatically from the landing page
+/// (`config.js` on GitHub Pages), because the free tunnel link changes whenever it restarts. A tester can still
+/// type an address by hand (Account → Server address), which turns automatic discovery off.
 class ServerModel extends ChangeNotifier {
   static const _key = 'server_address';
+  static const _manualKey = 'server_manual';
+  static const discoveryUrl = 'https://litu173.github.io/medicompare/config.js';
   SharedPreferences? _prefs;
+
+  /// True when the address was typed by hand; automatic discovery is then skipped.
+  bool manual = false;
 
   String get address => apiBase;
   bool get isCustom => apiBaseOverride != null;
@@ -231,17 +239,37 @@ class ServerModel extends ChangeNotifier {
   Future<void> load() async {
     _prefs = await SharedPreferences.getInstance();
     apiBaseOverride = _prefs!.getString(_key);
+    manual = _prefs!.getBool(_manualKey) ?? false;
   }
 
   /// Saves [url] (already normalised), or clears the override when null.
-  Future<void> set(String? url) async {
+  Future<void> set(String? url, {bool manual = true}) async {
+    this.manual = manual && url != null;
     apiBaseOverride = url == defaultApiBase ? null : url;
     if (apiBaseOverride == null) {
       await _prefs?.remove(_key);
     } else {
       await _prefs?.setString(_key, apiBaseOverride!);
     }
+    await _prefs?.setBool(_manualKey, this.manual);
     notifyListeners();
+  }
+
+  /// Reads the current store link published by the landing page. Returns true when the address changed.
+  Future<bool> discover({bool force = false}) async {
+    if (manual && !force) return false;
+    try {
+      final res = await http
+          .get(Uri.parse('$discoveryUrl?t=${DateTime.now().millisecondsSinceEpoch}'))
+          .timeout(const Duration(seconds: 6));
+      final m = RegExp(r'storeUrl:\s*"(https?://[^"]+)"').firstMatch(res.body);
+      final url = m == null ? null : normalizeServerAddress(m.group(1)!);
+      if (res.statusCode != 200 || url == null || url == apiBase) return false;
+      await set(url, manual: false);
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 }
 

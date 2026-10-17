@@ -302,7 +302,17 @@ class ErrorView extends StatelessWidget {
           Muted(error is ApiException ? error.toString() : 'Please try again.', size: 14, align: TextAlign.center),
           if (onRetry != null) ...[
             const SizedBox(height: 20),
-            SizedBox(width: 200, child: FilledButton(onPressed: onRetry, child: const Text('Try again'))),
+            SizedBox(
+              width: 200,
+              child: FilledButton(
+                onPressed: () async {
+                  // The store link may have moved; if so the whole app reloads against the new one.
+                  final moved = offline && await context.read<ServerModel>().discover();
+                  if (!moved) onRetry!();
+                },
+                child: const Text('Try again'),
+              ),
+            ),
           ],
           // Can't reach the server at all: offer to change its address (e.g. a tunnel link on a real phone).
           if (offline) ...[

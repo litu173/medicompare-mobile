@@ -12,6 +12,8 @@ Future<void> main() async {
   // Load the saved server address before anything talks to the API.
   final server = ServerModel();
   await server.load();
+  // Pick up the live store link before the first request (falls back to the saved one if offline).
+  await server.discover();
   final api = Api();
   final auth = AuthModel(api)..load();
   final cart = CartModel()..load();

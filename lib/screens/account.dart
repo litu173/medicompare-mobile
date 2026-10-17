@@ -711,6 +711,32 @@ class _ServerSettingsScreenState extends State<ServerSettingsScreen> {
     });
   }
 
+  /// Switches back to automatic discovery and connects to the live store.
+  Future<void> _auto() async {
+    setState(() {
+      _busy = true;
+      _error = null;
+      _ok = null;
+    });
+    final server = context.read<ServerModel>();
+    final before = apiBase;
+    await server.set(apiBaseOverride, manual: false);
+    await server.discover(force: true);
+    if (!mounted) return;
+    if (apiBase != before) {
+      await context.read<AuthModel>().forget();
+      if (!mounted) return;
+      context.read<MetaModel>().reset();
+      context.read<MetaModel>().get().ignore();
+      context.read<AuthModel>().load();
+    }
+    _controller.text = apiBase;
+    setState(() {
+      _busy = false;
+      _ok = 'Connected to ${Uri.parse(apiBase).authority}.';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final server = context.watch<ServerModel>();
@@ -719,12 +745,34 @@ class _ServerSettingsScreenState extends State<ServerSettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Muted(
-            'The Sashroy server this app talks to. To test on a phone, run the website on your computer and enter '
-            "its address on your Wi-Fi, e.g. http://192.168.1.20:3000 (find the IP in your computer's network settings).",
-            size: 14,
+          Panel(
+            color: Brand.c50,
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Icon(server.manual ? Icons.edit_location_alt_outlined : Icons.auto_awesome_rounded, color: Brand.c700),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(server.manual ? 'Using an address you typed' : 'Connected automatically',
+                      style: Txt.ui(15, weight: FontWeight.w800, color: Brand.c700)),
+                ),
+              ]),
+              const SizedBox(height: 6),
+              Text(Uri.parse(server.address).authority, style: Txt.ui(13, color: Brand.c900)),
+              const SizedBox(height: 6),
+              const Muted('Normally you never need to change this: the app finds the live Sashroy store by itself.', size: 13),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: _busy ? null : _auto,
+                icon: const Icon(Icons.wifi_find_rounded),
+                label: const Text('Find the store automatically'),
+              ),
+            ]),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
+          Text('ADVANCED · ENTER AN ADDRESS', style: Txt.eyebrow(color: Brand.muted)),
+          const SizedBox(height: 8),
+          const Muted('Only for testing your own server, e.g. http://192.168.1.20:3000 on the same Wi-Fi.', size: 13),
+          const SizedBox(height: 12),
           _ErrorText(_error),
           if (_ok != null)
             Container(
