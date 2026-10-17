@@ -6,7 +6,9 @@ import '../state.dart';
 import '../theme.dart';
 import 'account.dart';
 import 'catalog.dart';
+import 'settings.dart';
 import 'shop.dart';
+import '../i18n.dart';
 
 /// Bottom-tab shell. Each tab keeps its own navigation stack; the bar floats above the content.
 class Shell extends StatefulWidget {
@@ -26,6 +28,20 @@ class _ShellState extends State<Shell> {
     OrdersScreen(),
     AccountScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    final settings = context.read<SettingsModel>();
+    if (settings.reopenSettings) {
+      settings.reopenSettings = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _navigators[context.read<TabsModel>().index].currentState?.push(
+              PageRouteBuilder(pageBuilder: (_, _, _) => const SettingsScreen()),
+            );
+      });
+    }
+  }
 
   void _select(TabsModel tabs, int i) {
     HapticFeedback.selectionClick();
@@ -51,30 +67,50 @@ class _ShellState extends State<Shell> {
         if (nav != null && await nav.maybePop()) return;
         if (tabs.index != TabsModel.home) tabs.go(TabsModel.home);
       },
-      child: Scaffold(
-        extendBody: true,
-        body: IndexedStack(
-          index: tabs.index,
-          children: [
-            for (var i = 0; i < _roots.length; i++)
-              HeroControllerScope.none(
-                child: Navigator(
-                  key: _navigators[i],
-                  onGenerateRoute: (_) => MaterialPageRoute(builder: (_) => _roots[i]),
+      // Default status bar for the light (or dark-theme) tabs; Home's own region overrides it while visible.
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: Brand.dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
+        child: Scaffold(
+          extendBody: true,
+          body: IndexedStack(
+            index: tabs.index,
+            children: [
+              for (var i = 0; i < _roots.length; i++)
+                HeroControllerScope.none(
+                  child: Navigator(
+                    key: _navigators[i],
+                    onGenerateRoute: (_) =>
+                        MaterialPageRoute(builder: (_) => _roots[i]),
+                  ),
                 ),
+            ],
+          ),
+          bottomNavigationBar: _FloatingBar(
+            index: tabs.index,
+            onSelect: (i) => _select(tabs, i),
+            items: [
+              _NavItem(Icons.home_outlined, Icons.home_rounded, 'Home'),
+              _NavItem(Icons.search_rounded, Icons.search_rounded, 'Search'),
+              _NavItem(
+                Icons.shopping_bag_outlined,
+                Icons.shopping_bag_rounded,
+                'Cart',
+                badge: cartCount,
               ),
-          ],
-        ),
-        bottomNavigationBar: _FloatingBar(
-          index: tabs.index,
-          onSelect: (i) => _select(tabs, i),
-          items: [
-            const _NavItem(Icons.home_outlined, Icons.home_rounded, 'Home'),
-            const _NavItem(Icons.search_rounded, Icons.search_rounded, 'Search'),
-            _NavItem(Icons.shopping_bag_outlined, Icons.shopping_bag_rounded, 'Cart', badge: cartCount),
-            const _NavItem(Icons.receipt_long_outlined, Icons.receipt_long_rounded, 'Orders'),
-            _NavItem(Icons.person_outline_rounded, Icons.person_rounded, signedIn ? 'Account' : 'Sign in'),
-          ],
+              _NavItem(
+                Icons.receipt_long_outlined,
+                Icons.receipt_long_rounded,
+                'Orders',
+              ),
+              _NavItem(
+                Icons.person_outline_rounded,
+                Icons.person_rounded,
+                signedIn ? tr('Account') : tr('Sign in'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -89,67 +125,96 @@ class _NavItem {
 }
 
 class _FloatingBar extends StatelessWidget {
-  const _FloatingBar({required this.index, required this.onSelect, required this.items});
+  const _FloatingBar({
+    required this.index,
+    required this.onSelect,
+    required this.items,
+  });
   final int index;
   final ValueChanged<int> onSelect;
   final List<_NavItem> items;
 
   @override
   Widget build(BuildContext context) => SafeArea(
-        minimum: const EdgeInsets.fromLTRB(14, 0, 14, 10),
-        child: Container(
-          height: 66,
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          decoration: BoxDecoration(
-            color: Brand.night,
-            borderRadius: BorderRadius.circular(26),
-            boxShadow: Brand.shadowStrong,
-            border: Border.all(color: Brand.gold.withValues(alpha: 0.22)),
-          ),
-          child: Row(children: [
-            for (final (i, item) in items.indexed)
-              Expanded(
-                flex: i == index ? 15 : 10,
-                child: Semantics(
-                  selected: i == index,
-                  button: true,
-                  label: item.label,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => onSelect(i),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 280),
-                      curve: Curves.easeOutCubic,
-                      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
-                      decoration: BoxDecoration(
-                        color: i == index ? Brand.gold.withValues(alpha: 0.16) : Colors.transparent,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+    minimum: EdgeInsets.fromLTRB(14, 0, 14, 10),
+    child: Container(
+      height: 66,
+      padding: EdgeInsets.symmetric(horizontal: 6),
+      decoration: BoxDecoration(
+        color: Brand.night,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: Brand.shadowStrong,
+        border: Border.all(color: Brand.gold.withValues(alpha: 0.22)),
+      ),
+      child: Row(
+        children: [
+          for (final (i, item) in items.indexed)
+            Expanded(
+              flex: i == index ? 15 : 10,
+              child: Semantics(
+                selected: i == index,
+                button: true,
+                label: tr(item.label),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => onSelect(i),
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 280),
+                    curve: Curves.easeOutCubic,
+                    margin: EdgeInsets.symmetric(vertical: 10, horizontal: 2),
+                    decoration: BoxDecoration(
+                      color: i == index
+                          ? Brand.gold.withValues(alpha: 0.16)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
                         Badge(
                           isLabelVisible: item.badge > 0,
                           backgroundColor: Brand.gold,
                           textColor: Brand.night,
-                          label: Text('${item.badge}', style: Txt.ui(10, weight: FontWeight.w800, color: Brand.night)),
-                          child: Icon(i == index ? item.activeIcon : item.icon,
-                              size: 23, color: i == index ? Brand.gold2 : Colors.white.withValues(alpha: 0.72)),
+                          label: Text(
+                            '${item.badge}',
+                            style: Txt.ui(
+                              10,
+                              weight: FontWeight.w800,
+                              color: Brand.night,
+                            ),
+                          ),
+                          child: Icon(
+                            i == index ? item.activeIcon : item.icon,
+                            size: 23,
+                            color: i == index
+                                ? Brand.gold2
+                                : Colors.white.withValues(alpha: 0.72),
+                          ),
                         ),
                         if (i == index) ...[
-                          const SizedBox(width: 6),
+                          SizedBox(width: 6),
                           Flexible(
-                            child: Text(item.label,
-                                maxLines: 1,
-                                overflow: TextOverflow.fade,
-                                softWrap: false,
-                                style: Txt.ui(12.5, weight: FontWeight.w700, color: Brand.gold2)),
+                            child: Text(
+                              tr(item.label),
+                              maxLines: 1,
+                              overflow: TextOverflow.fade,
+                              softWrap: false,
+                              style: Txt.ui(
+                                12.5,
+                                weight: FontWeight.w700,
+                                color: Brand.gold2,
+                              ),
+                            ),
                           ),
                         ],
-                      ]),
+                      ],
                     ),
                   ),
                 ),
               ),
-          ]),
-        ),
-      );
+            ),
+        ],
+      ),
+    ),
+  );
 }

@@ -129,6 +129,10 @@ class Api {
   Future<AuthResult> register(Map<String, String> body) async => AuthResult.fromJson(await post('/auth/register', body));
   Future<void> logout() => post('/auth/logout');
   Future<User> me() async => User.fromJson((await get('/auth/me'))['user']);
+  Future<User> updateProfile(String name, String phone) async =>
+      User.fromJson((await _send(() => _client.patch(_uri('/auth/me'), headers: _headers, body: jsonEncode({'name': name, 'phone': phone}))))['user']);
+  Future<void> changePassword(String current, String next) => post('/auth/password', {'current': current, 'next': next});
+  Future<void> deleteAccount() => delete('/auth/me');
   Future<List<Address>> addresses() async => Address.listFrom((await get('/addresses'))['addresses']);
   Future<List<Address>> addAddress(Map<String, dynamic> body) async =>
       Address.listFrom((await post('/addresses', body))['addresses']);

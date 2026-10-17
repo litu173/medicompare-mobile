@@ -10,6 +10,7 @@ import 'screens/account.dart';
 import 'screens/catalog.dart';
 import 'state.dart';
 import 'theme.dart';
+import 'i18n.dart';
 
 // ───────────────────────────── Surfaces ─────────────────────────────
 
@@ -19,14 +20,15 @@ class Panel extends StatelessWidget {
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(18),
-    this.color = Colors.white,
+    this.color,
     this.radius = 22,
     this.onTap,
     this.border,
   });
   final Widget child;
   final EdgeInsetsGeometry padding;
-  final Color color;
+  /// Defaults to the theme surface (white, or dark green in dark mode).
+  final Color? color;
   final double radius;
   final VoidCallback? onTap;
   final BoxBorder? border;
@@ -34,9 +36,9 @@ class Panel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         decoration: BoxDecoration(
-          color: color,
+          color: color ?? Brand.surface,
           borderRadius: BorderRadius.circular(radius),
-          boxShadow: color == Colors.white ? Brand.shadow : null,
+          boxShadow: color == null ? Brand.shadow : null,
           border: border,
         ),
         // A Material so InkWells and ListTiles inside paint their ripples.
@@ -63,7 +65,7 @@ class ListPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             for (var i = 0; i < children.length; i++) ...[
-              if (i > 0) const Divider(indent: 16, endIndent: 16),
+              if (i > 0) Divider(indent: 16, endIndent: 16),
               children[i],
             ],
           ],
@@ -96,25 +98,28 @@ class NightCard extends StatelessWidget {
 }
 
 class Tag extends StatelessWidget {
-  const Tag(this.text, {super.key, this.bg = Brand.c100, this.fg = Brand.c700, this.icon});
+  const Tag(this.text, {super.key, this.background, this.foreground, this.icon});
   final String text;
-  final Color bg, fg;
+  final Color? background, foreground;
   final IconData? icon;
 
-  const Tag.gold(this.text, {super.key, this.icon})
-      : bg = Brand.goldBg,
-        fg = Brand.goldDeep;
+  Color get bg => background ?? Brand.c100;
+  Color get fg => foreground ?? Brand.c700;
 
-  const Tag.warn(this.text, {super.key, this.icon})
-      : bg = const Color(0xFFFFE9E3),
-        fg = Brand.danger;
+  Tag.gold(this.text, {super.key, this.icon})
+      : background = Brand.goldBg,
+        foreground = Brand.goldDeep;
+
+  Tag.warn(this.text, {super.key, this.icon})
+      : background = Brand.dark ? const Color(0xFF3A1A14) : const Color(0xFFFFE9E3),
+        foreground = Brand.danger;
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
         decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(99)),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
-          if (icon != null) ...[Icon(icon, size: 11, color: fg), const SizedBox(width: 3)],
+          if (icon != null) ...[Icon(icon, size: 11, color: fg), SizedBox(width: 3)],
           Text(text, style: Txt.ui(11, color: fg, weight: FontWeight.w700, spacing: 0.2)),
         ]),
       );
@@ -128,13 +133,13 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
+        padding: EdgeInsets.only(bottom: 12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                if (eyebrow != null) ...[Text(eyebrow!.toUpperCase(), style: Txt.eyebrow()), const SizedBox(height: 4)],
+                if (eyebrow != null) ...[Text(eyebrow!.toUpperCase(), style: Txt.eyebrow()), SizedBox(height: 4)],
                 Text(title, style: Txt.display(22, weight: FontWeight.w600)),
               ]),
             ),
@@ -142,7 +147,7 @@ class SectionHeader extends StatelessWidget {
             if (action != null)
               TextButton(
                 onPressed: onAction,
-                style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8), minimumSize: const Size(0, 32)),
+                style: TextButton.styleFrom(padding: EdgeInsets.symmetric(horizontal: 8), minimumSize: Size(0, 32)),
                 child: Text(action!),
               ),
           ],
@@ -177,20 +182,20 @@ class Pill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        color: selected ? Brand.night : Colors.white,
+        color: selected ? Brand.night : Brand.surface,
         shape: StadiumBorder(side: BorderSide(color: selected ? Brand.night : Brand.line)),
         child: InkWell(
-          customBorder: const StadiumBorder(),
+          customBorder: StadiumBorder(),
           onTap: () {
             HapticFeedback.selectionClick();
             onTap();
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               if (icon != null) ...[
                 Icon(icon, size: 16, color: selected ? Brand.gold2 : Brand.c600),
-                const SizedBox(width: 6),
+                SizedBox(width: 6),
               ],
               Text(label, style: Txt.ui(14, weight: FontWeight.w600, color: selected ? Colors.white : Brand.ink)),
             ]),
@@ -208,7 +213,7 @@ class HScroll extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 4),
         clipBehavior: Clip.none,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,20 +249,20 @@ class Wordmark extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text('সাশ্রয়', style: Txt.bn(size, color: light ? Brand.bg : Brand.night, weight: FontWeight.w700, height: 1)),
-          const SizedBox(width: 8),
-          Text('SASHROY', style: Txt.eyebrow(color: light ? Brand.gold2 : Brand.goldDeep)),
+          Text(tr('সাশ্রয়'), style: Txt.bn(size, color: light ? const Color(0xFFF7F4EC) : Brand.ink, weight: FontWeight.w700, height: 1)),
+          SizedBox(width: 8),
+          Text(tr('SASHROY'), style: Txt.eyebrow(color: light ? Brand.gold2 : Brand.goldDeep)),
         ],
       );
 }
 
 /// A taka amount in the display serif.
 class PriceText extends StatelessWidget {
-  const PriceText(this.value, {super.key, this.unit, this.size = 18, this.color = Brand.ink, this.strike = false});
+  const PriceText(this.value, {super.key, this.unit, this.size = 18, this.color, this.strike = false});
   final num? value;
   final String? unit;
   final double size;
-  final Color color;
+  final Color? color;
   final bool strike;
 
   @override
@@ -287,21 +292,21 @@ class ErrorView extends StatelessWidget {
     final offline = error is ApiException && (error as ApiException).status == 0;
     return Center(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(32),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Container(
             width: 72,
             height: 72,
-            decoration: const BoxDecoration(color: Brand.goldBg, shape: BoxShape.circle),
+            decoration: BoxDecoration(color: Brand.goldBg, shape: BoxShape.circle),
             child: Icon(offline ? Icons.wifi_off_rounded : Icons.error_outline_rounded, size: 32, color: Brand.goldDeep),
           ),
-          const SizedBox(height: 16),
-          Text(offline ? "Can't reach Sashroy" : 'Something went wrong',
+          SizedBox(height: 16),
+          Text(offline ? tr("Can't reach Sashroy") : tr('Something went wrong'),
               style: Txt.display(22, weight: FontWeight.w600), textAlign: TextAlign.center),
-          const SizedBox(height: 6),
-          Muted(error is ApiException ? error.toString() : 'Please try again.', size: 14, align: TextAlign.center),
+          SizedBox(height: 6),
+          Muted(error is ApiException ? error.toString() : tr('Please try again.'), size: 14, align: TextAlign.center),
           if (onRetry != null) ...[
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             SizedBox(
               width: 200,
               child: FilledButton(
@@ -310,16 +315,16 @@ class ErrorView extends StatelessWidget {
                   final moved = offline && await context.read<ServerModel>().discover();
                   if (!moved) onRetry!();
                 },
-                child: const Text('Try again'),
+                child: Text(tr('Try again')),
               ),
             ),
           ],
           // Can't reach the server at all: offer to change its address (e.g. a tunnel link on a real phone).
           if (offline) ...[
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             TextButton.icon(
               onPressed: () => openServerSettings(context),
-              icon: const Icon(Icons.dns_outlined, size: 18),
+              icon: Icon(Icons.dns_outlined, size: 18),
               label: Text('Server: ${Uri.parse(apiBase).authority}'),
             ),
           ],
@@ -339,7 +344,7 @@ class SkeletonList extends StatefulWidget {
 }
 
 class _SkeletonListState extends State<SkeletonList> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..repeat(reverse: true);
+  late final _c = AnimationController(vsync: this, duration: Duration(milliseconds: 1100))..repeat(reverse: true);
 
   @override
   void dispose() {
@@ -351,14 +356,14 @@ class _SkeletonListState extends State<SkeletonList> with SingleTickerProviderSt
   Widget build(BuildContext context) => FadeTransition(
         opacity: Tween(begin: 0.45, end: 1.0).animate(_c),
         child: ListView(
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(20),
+          physics: NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.all(20),
           children: [
             for (var i = 0; i < widget.count; i++)
               Container(
                 height: i == 0 ? 150 : 86,
-                margin: const EdgeInsets.only(bottom: 14),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(22)),
+                margin: EdgeInsets.only(bottom: 14),
+                decoration: BoxDecoration(color: Brand.surface, borderRadius: BorderRadius.circular(22)),
               ),
           ],
         ),
@@ -403,11 +408,11 @@ class _LoaderState<T> extends State<Loader<T>> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading && _data == null) return const SkeletonList();
+    if (_loading && _data == null) return SkeletonList();
     if (_data == null) return ErrorView(_error ?? 'Not found', onRetry: _reload);
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 350),
-      child: KeyedSubtree(key: const ValueKey('loaded'), child: widget.builder(context, _data as T, _reload)),
+      duration: Duration(milliseconds: 350),
+      child: KeyedSubtree(key: ValueKey('loaded'), child: widget.builder(context, _data as T, _reload)),
     );
   }
 }
@@ -436,7 +441,7 @@ class ProductThumb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final placeholder = DecoratedBox(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Brand.c50, Color(0xFFF4EFE3)]),
       ),
       child: Center(child: Icon(formIcon(form), size: size * 0.46, color: Brand.c600)),
@@ -469,15 +474,15 @@ void addToCart(BuildContext context, CartLine line) {
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(
       content: Row(children: [
-        const Icon(Icons.check_circle_rounded, color: Brand.mint, size: 20),
-        const SizedBox(width: 10),
-        Expanded(child: Text('${line.brandName} added to cart')),
+        Icon(Icons.check_circle_rounded, color: Brand.mint, size: 20),
+        SizedBox(width: 10),
+        Expanded(child: Text(tr('{name} added to cart', {'name': line.brandName}))),
       ]),
-      duration: const Duration(seconds: 3),
+      duration: Duration(seconds: 3),
       persist: false,
       action: context.read<TabsModel>().index == TabsModel.cart
           ? null
-          : SnackBarAction(label: 'View cart', onPressed: () => context.read<TabsModel>().go(TabsModel.cart)),
+          : SnackBarAction(label: tr('View cart'), onPressed: () => context.read<TabsModel>().go(TabsModel.cart)),
     ));
 }
 
@@ -489,7 +494,7 @@ class AddControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final canAdd = m.packId != null && m.listPrice != null && m.listLabel != null;
-    if (!canAdd) return const SizedBox.shrink();
+    if (!canAdd) return SizedBox.shrink();
     final step = isPerPiece(m.listLabel) ? 10 : 1;
     final line = context.select<CartModel, CartLine?>((c) => c.lines.where((l) => l.packId == m.packId).firstOrNull);
     final qty = line?.qty ?? 0;
@@ -518,10 +523,10 @@ class AddControl extends StatelessWidget {
       button: true,
       label: out ? '${m.brandName} sold out' : 'Add ${m.brandName} to cart',
       child: Material(
-        color: out ? const Color(0xFFE9ECEA) : Brand.c600,
-        shape: const CircleBorder(),
+        color: out ? Color(0xFFE9ECEA) : Brand.c600,
+        shape: CircleBorder(),
         child: InkWell(
-          customBorder: const CircleBorder(),
+          customBorder: CircleBorder(),
           onTap: out
               ? null
               : () => addToCart(
@@ -559,7 +564,7 @@ class _RoundIcon extends StatelessWidget {
         onPressed: onTap,
         visualDensity: VisualDensity.compact,
         padding: EdgeInsets.zero,
-        constraints: const BoxConstraints.tightFor(width: 38, height: 38),
+        constraints: BoxConstraints.tightFor(width: 38, height: 38),
         icon: Icon(icon, size: 18, color: Brand.c700),
       );
 }
@@ -594,11 +599,11 @@ class MedicineTile extends StatelessWidget {
       child: InkWell(
         onTap: () => openMedicine(context, m.id),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+          padding: EdgeInsets.fromLTRB(16, 14, 14, 14),
           child: Row(
             children: [
               ProductThumb(m.image, form: m.dosageForm),
-              const SizedBox(width: 14),
+              SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -612,35 +617,35 @@ class MedicineTile extends StatelessWidget {
                         if (m.strength != null) Text(m.strength!, style: Txt.ui(13, color: Brand.muted, weight: FontWeight.w600)),
                       ],
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: 2),
                     Text(
                       '${showGeneric ? '${m.dosageForm} · ${m.genericName} · ' : ''}${m.manufacturerName}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Txt.ui(12, color: Brand.muted),
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     Wrap(spacing: 6, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
                       PriceText(m.comparePrice, unit: m.compareUnit, size: 17),
-                      if (cheapest && !out && !m.priceSuspect) const Tag.gold('Cheapest', icon: Icons.workspace_premium_rounded),
-                      if (highlight != null) Tag(highlight!, bg: Brand.night, fg: Brand.gold2),
+                      if (cheapest && !out && !m.priceSuspect) Tag.gold(tr('Cheapest'), icon: Icons.workspace_premium_rounded),
+                      if (highlight != null) Tag(tr(highlight!), background: Brand.night, foreground: Brand.gold2),
                       if (out)
-                        Tag.warn(m.comparePrice == null ? 'No price' : 'Out of stock')
+                        Tag.warn(m.comparePrice == null ? tr('No price') : tr('Out of stock'))
                       else if (m.priceSuspect)
-                        const Tag('Price unverified', bg: Brand.amberBg, fg: Brand.amber)
+                        Tag(tr('Price unverified'), background: Brand.amberBg, foreground: Brand.amber)
                       else if (save > 0)
-                        Tag('Save $save%', icon: Icons.south_east_rounded),
+                        Tag(tr('Save {n}%', {'n': save}), icon: Icons.south_east_rounded),
                     ]),
                     if (cheaperCount > 0)
                       Padding(
-                        padding: const EdgeInsets.only(top: 6),
-                        child: Text('$cheaperCount cheaper equivalent${cheaperCount > 1 ? 's' : ''} elsewhere',
+                        padding: EdgeInsets.only(top: 6),
+                        child: Text(tr('{n} cheaper equivalents elsewhere', {'n': cheaperCount}),
                             style: Txt.ui(12, weight: FontWeight.w700, color: Brand.amber)),
                       ),
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: 10),
               AddControl(m: m),
             ],
           ),
@@ -723,25 +728,25 @@ class SearchField extends StatelessWidget {
           autocorrect: false,
           style: Txt.ui(16, weight: FontWeight.w600),
           decoration: InputDecoration(
-            hintText: 'Search brand or generic · e.g. Napa',
-            prefixIcon: const Padding(
+            hintText: tr('Search brand or generic · e.g. Napa'),
+            prefixIcon: Padding(
               padding: EdgeInsets.only(left: 6),
               child: Icon(Icons.search_rounded, color: Brand.c600, size: 24),
             ),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
             focusedBorder:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Brand.c600, width: 1.6)),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide(color: Brand.c600, width: 1.6)),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
             suffixIcon: controller == null
                 ? null
                 : ListenableBuilder(
                     listenable: controller!,
                     builder: (context, _) => controller!.text.isEmpty
-                        ? const SizedBox.shrink()
+                        ? SizedBox.shrink()
                         : IconButton(
-                            tooltip: 'Clear',
-                            icon: const Icon(Icons.close_rounded, size: 20),
+                            tooltip: tr('Clear'),
+                            icon: Icon(Icons.close_rounded, size: 20),
                             onPressed: () {
                               controller!.clear();
                               onChanged?.call('');
@@ -754,7 +759,7 @@ class SearchField extends StatelessWidget {
 }
 
 /// Page-gutter padding for list children (horizontal scrollers stay unpadded so they bleed to the edges).
-Widget gutter(Widget child) => Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: child);
+Widget gutter(Widget child) => Padding(padding: EdgeInsets.symmetric(horizontal: 20), child: child);
 
 /// Input-style field that opens a searchable bottom-sheet list (friendlier than a long dropdown).
 class PickerField extends StatelessWidget {
@@ -782,7 +787,7 @@ class PickerField extends StatelessWidget {
       isScrollControlled: true,
       useRootNavigator: true,
       backgroundColor: Brand.bg,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
       builder: (_) => _PickerSheet(title: label, options: options, selected: value),
     );
     if (picked != null) {
@@ -804,7 +809,7 @@ class PickerField extends StatelessWidget {
             decoration: InputDecoration(
               labelText: label,
               prefixIcon: Icon(icon),
-              suffixIcon: const Icon(Icons.unfold_more_rounded),
+              suffixIcon: Icon(Icons.unfold_more_rounded),
               errorText: field.errorText,
               enabled: enabled && options.isNotEmpty,
             ),
@@ -834,27 +839,27 @@ class _PickerSheetState extends State<_PickerSheet> {
       child: SizedBox(
         height: MediaQuery.sizeOf(context).height * 0.75,
         child: Column(children: [
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Container(width: 44, height: 5, decoration: BoxDecoration(color: Brand.line, borderRadius: BorderRadius.circular(99))),
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
+            padding: EdgeInsets.fromLTRB(20, 16, 20, 10),
             child: Row(children: [
               Expanded(child: Text(widget.title, style: Txt.display(24, weight: FontWeight.w600))),
-              IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close_rounded)),
+              IconButton(onPressed: () => Navigator.pop(context), icon: Icon(Icons.close_rounded)),
             ]),
           ),
           if (widget.options.length > 8)
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 10),
               child: TextField(
                 autofocus: false,
-                decoration: InputDecoration(hintText: 'Search ${widget.title.toLowerCase()}', prefixIcon: const Icon(Icons.search_rounded)),
+                decoration: InputDecoration(hintText: tr('Search'), prefixIcon: Icon(Icons.search_rounded)),
                 onChanged: (v) => setState(() => _q = v.trim()),
               ),
             ),
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+              padding: EdgeInsets.fromLTRB(12, 0, 12, 16),
               itemCount: list.length,
               itemBuilder: (context, i) {
                 final o = list[i];
@@ -863,7 +868,7 @@ class _PickerSheetState extends State<_PickerSheet> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   tileColor: sel ? Brand.c50 : null,
                   title: Text(o, style: Txt.ui(16, weight: sel ? FontWeight.w800 : FontWeight.w600, color: sel ? Brand.c700 : Brand.ink)),
-                  trailing: sel ? const Icon(Icons.check_circle_rounded, color: Brand.c600) : null,
+                  trailing: sel ? Icon(Icons.check_circle_rounded, color: Brand.c600) : null,
                   onTap: () => Navigator.pop(context, o),
                 );
               },
@@ -887,17 +892,17 @@ class ThanaField extends StatelessWidget {
     if (thanas.isEmpty) {
       return TextFormField(
         controller: controller,
-        decoration: const InputDecoration(labelText: 'Area / thana', hintText: 'e.g. Mirpur', prefixIcon: Icon(Icons.place_outlined)),
-        validator: (v) => (v ?? '').trim().length < 2 ? 'Enter your area / thana' : null,
+        decoration: InputDecoration(labelText: tr('Area / thana'), hintText: tr('e.g. Mirpur'), prefixIcon: Icon(Icons.place_outlined)),
+        validator: (v) => (v ?? '').trim().length < 2 ? tr('Enter your area / thana') : null,
         onChanged: (_) => onChanged?.call(),
       );
     }
     return PickerField(
-      label: 'Thana / upazila',
+      label: tr('Thana / upazila'),
       icon: Icons.place_outlined,
       options: thanas,
       value: thanas.contains(controller.text) ? controller.text : null,
-      errorText: 'Choose your thana',
+      errorText: tr('Choose your thana'),
       onChanged: (v) {
         controller.text = v;
         onChanged?.call();
@@ -914,7 +919,7 @@ class Monograph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sections = generic.monograph;
-    if (sections.isEmpty) return const SizedBox.shrink();
+    if (sections.isEmpty) return SizedBox.shrink();
     return ListPanel(children: [
       for (final (i, (title, body)) in sections.indexed)
         Theme(
@@ -924,15 +929,15 @@ class Monograph extends StatelessWidget {
             iconColor: Brand.c700,
             collapsedIconColor: Brand.muted,
             title: Text(title, style: Txt.ui(15, weight: FontWeight.w700)),
-            childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            childrenPadding: EdgeInsets.fromLTRB(16, 0, 16, 16),
             expandedAlignment: Alignment.topLeft,
-            children: [Text(body, style: Txt.ui(14, color: const Color(0xFF34443D), weight: FontWeight.w500, height: 1.6))],
+            children: [Text(body, style: Txt.ui(14, color: Color(0xFF34443D), weight: FontWeight.w500, height: 1.6))],
           ),
         ),
       Container(
         color: Brand.bg,
-        padding: const EdgeInsets.all(14),
-        child: const Muted("Source: open MedEx-derived dataset. For reference only — follow your doctor's prescription.", size: 11),
+        padding: EdgeInsets.all(14),
+        child: Muted(tr("Source: open MedEx-derived dataset. For reference only — follow your doctor's prescription."), size: 11),
       ),
     ]);
   }

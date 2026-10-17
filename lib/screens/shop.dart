@@ -13,6 +13,7 @@ import '../theme.dart';
 import '../widgets.dart';
 import 'account.dart';
 import 'catalog.dart';
+import '../i18n.dart';
 
 // ───────────────────────────── Cart ─────────────────────────────
 
@@ -82,7 +83,7 @@ class _CartScreenState extends State<CartScreen> {
     ));
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text('Switched to ${c.brandName} · same medicine, ${c.savePct}% cheaper')));
+      ..showSnackBar(SnackBar(content: Text(tr('Switched to {name} · same medicine, {n}% cheaper', {'name': c.brandName, 'n': c.savePct}))));
   }
 
   void _switchAll(Quote q) {
@@ -96,27 +97,27 @@ class _CartScreenState extends State<CartScreen> {
   Widget build(BuildContext context) {
     final cart = context.watch<CartModel>();
     return Scaffold(
-      appBar: AppBar(title: Text(cart.isEmpty ? 'Cart' : 'Cart · ${cart.count}')),
+      appBar: AppBar(title: Text(cart.isEmpty ? tr('Cart') : '${tr('Cart')} · ${cart.count}')),
       body: cart.isEmpty ? _empty(context) : _filled(context, cart),
     );
   }
 
   Widget _empty(BuildContext context) => Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(32, 0, 32, 120),
+          padding: EdgeInsets.fromLTRB(32, 0, 32, 120),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Illustration('empty_cart', height: 190),
-            const SizedBox(height: 16),
-            Text('Your cart is empty', style: Txt.display(26, weight: FontWeight.w600)),
-            const SizedBox(height: 6),
-            const Muted('Search a medicine and pick the cheapest equal brand.', align: TextAlign.center, size: 15),
-            const SizedBox(height: 22),
+            Illustration('empty_cart', height: 190),
+            SizedBox(height: 16),
+            Text(tr('Your cart is empty'), style: Txt.display(26, weight: FontWeight.w600)),
+            SizedBox(height: 6),
+            Muted(tr('Search a medicine and pick the cheapest equal brand.'), align: TextAlign.center, size: 15),
+            SizedBox(height: 22),
             SizedBox(
               width: 230,
               child: FilledButton.icon(
                 onPressed: () => context.read<TabsModel>().focusSearch(),
-                icon: const Icon(Icons.search_rounded),
-                label: const Text('Search medicines'),
+                icon: Icon(Icons.search_rounded),
+                label: Text(tr('Search medicines')),
               ),
             ),
           ]),
@@ -139,40 +140,40 @@ class _CartScreenState extends State<CartScreen> {
             _quotedFor = null;
             return _requote();
           },
-          child: ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 20), children: [
-            if (_error != null) Padding(padding: const EdgeInsets.only(bottom: 12), child: _Banner.error(_error.toString())),
+          child: ListView(padding: EdgeInsets.fromLTRB(20, 4, 20, 20), children: [
+            if (_error != null) Padding(padding: EdgeInsets.only(bottom: 12), child: _Banner.error(_error.toString())),
             if (potential >= 1) ...[
               NightCard(
-                padding: const EdgeInsets.all(18),
+                padding: EdgeInsets.all(18),
                 child: Row(children: [
                   Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('SWITCH & SAVE', style: Txt.eyebrow(color: Brand.gold2)),
-                      const SizedBox(height: 4),
+                      Text(tr('SWITCH & SAVE'), style: Txt.eyebrow(color: Brand.gold2)),
+                      SizedBox(height: 4),
                       Text.rich(TextSpan(style: Txt.ui(14, color: Colors.white, height: 1.4), children: [
-                        const TextSpan(text: 'Same medicines, cheaper brands. Save about '),
+                        TextSpan(text: tr('Same medicines, cheaper brands. Save about ')),
                         TextSpan(text: taka(potential.round()), style: Txt.display(18, color: Brand.gold2, weight: FontWeight.w600)),
                       ])),
                     ]),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: 10),
                   FilledButton(
                     style: FilledButton.styleFrom(
                       backgroundColor: Brand.gold,
                       foregroundColor: Brand.night,
-                      minimumSize: const Size(0, 44),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      minimumSize: Size(0, 44),
+                      padding: EdgeInsets.symmetric(horizontal: 16),
                     ),
                     onPressed: () => _switchAll(q!),
-                    child: Text('Switch all', style: Txt.ui(14, weight: FontWeight.w800, color: Brand.night)),
+                    child: Text(tr('Switch all'), style: Txt.ui(14, weight: FontWeight.w800, color: Brand.night)),
                   ),
                 ]),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
             ],
             for (final l in cart.lines)
               Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: EdgeInsets.only(bottom: 12),
                 child: _CartLineCard(
                   line: l,
                   quoted: q == null ? null : byPack[l.packId],
@@ -181,16 +182,16 @@ class _CartScreenState extends State<CartScreen> {
                 ),
               ),
             if (q != null) ...[
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Panel(
                 child: Column(children: [
-                  _SumRow('Subtotal', taka(q.subtotal)),
-                  const SizedBox(height: 8),
-                  _SumRow('Delivery (Dhaka)', q.deliveryFee == 0 ? 'Free' : taka(q.deliveryFee)),
-                  const Divider(height: 24),
-                  _SumRow('Total', taka(q.total), bold: true),
+                  _SumRow(tr('Subtotal'), taka(q.subtotal)),
+                  SizedBox(height: 8),
+                  _SumRow(tr('Delivery (Dhaka)'), q.deliveryFee == 0 ? tr('Free') : taka(q.deliveryFee)),
+                  Divider(height: 24),
+                  _SumRow(tr('Total'), taka(q.total), bold: true),
                   if (q.subtotal < freeOver) ...[
-                    const SizedBox(height: 14),
+                    SizedBox(height: 14),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(99),
                       child: LinearProgressIndicator(
@@ -200,12 +201,12 @@ class _CartScreenState extends State<CartScreen> {
                         color: Brand.gold,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text('Add ${taka(freeOver - q.subtotal)} more for free delivery',
+                    SizedBox(height: 8),
+                    Text(tr('Add {amount} more for free delivery', {'amount': taka(freeOver - q.subtotal)}),
                         style: Txt.ui(12, weight: FontWeight.w700, color: Brand.goldDeep)),
                   ],
-                  const SizedBox(height: 6),
-                  const Muted('Delivery outside Dhaka is calculated at checkout.', size: 11),
+                  SizedBox(height: 6),
+                  Muted(tr('Delivery outside Dhaka is calculated at checkout.'), size: 11),
                 ]),
               ),
             ],
@@ -215,15 +216,15 @@ class _CartScreenState extends State<CartScreen> {
       _BottomBar(
         child: FilledButton(
           onPressed: upToDate && q.allAvailable
-              ? () => Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => const CheckoutScreen()))
+              ? () => Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => CheckoutScreen()))
               : null,
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text(q != null && !q.allAvailable ? 'Fix items above to continue' : 'Checkout'),
+            Text(q != null && !q.allAvailable ? tr('Fix items above to continue') : tr('Checkout')),
             if (q != null && q.allAvailable) ...[
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text('· ${taka(q.total)}'),
-              const SizedBox(width: 6),
-              const Icon(Icons.arrow_forward_rounded, size: 20),
+              SizedBox(width: 6),
+              Icon(Icons.arrow_forward_rounded, size: 20),
             ],
           ]),
         ),
@@ -243,7 +244,7 @@ class _BottomBar extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(20, 12, 20, clearNav ? 96 + MediaQuery.paddingOf(context).bottom : 12),
         decoration: BoxDecoration(
           color: Brand.bg,
-          boxShadow: [BoxShadow(color: Brand.night.withValues(alpha: 0.06), blurRadius: 20, offset: const Offset(0, -6))],
+          boxShadow: [BoxShadow(color: Brand.night.withValues(alpha: 0.06), blurRadius: 20, offset: Offset(0, -6))],
         ),
         child: child,
       );
@@ -266,65 +267,65 @@ class _CartLineCard extends StatelessWidget {
       direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 24),
-        decoration: BoxDecoration(color: const Color(0xFFFFE9E3), borderRadius: BorderRadius.circular(22)),
-        child: const Icon(Icons.delete_outline_rounded, color: Brand.danger),
+        padding: EdgeInsets.only(right: 24),
+        decoration: BoxDecoration(color: Color(0xFFFFE9E3), borderRadius: BorderRadius.circular(22)),
+        child: Icon(Icons.delete_outline_rounded, color: Brand.danger),
       ),
       onDismissed: (_) => cart.remove(line.packId),
       child: Panel(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             InkWell(
               onTap: () => openMedicine(context, line.medicineId),
               child: ProductThumb(q?.image, size: 60, form: q?.description ?? line.description),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: InkWell(
                 onTap: () => openMedicine(context, line.medicineId),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(line.brandName, style: Txt.ui(16, weight: FontWeight.w800)),
                   Muted(q?.description ?? line.description, maxLines: 1),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2),
                   Muted('${line.packLabel} · ${taka(q?.price ?? line.price)} each'),
                 ]),
               ),
             ),
             IconButton(
-              tooltip: 'Remove',
+              tooltip: tr('Remove'),
               visualDensity: VisualDensity.compact,
-              icon: const Icon(Icons.close_rounded, size: 20, color: Brand.muted),
+              icon: Icon(Icons.close_rounded, size: 20, color: Brand.muted),
               onPressed: () => cart.remove(line.packId),
             ),
           ]),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Row(children: [
             QtyStepper(compact: true, value: line.qty, onChanged: (v) => cart.setQty(line.packId, v)),
-            const Spacer(),
+            Spacer(),
             PriceText(q?.lineTotal ?? line.price * line.qty, size: 20),
           ]),
           if (gone)
             Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text('No longer available · please remove', style: Txt.ui(12, color: Brand.danger, weight: FontWeight.w700)),
+              padding: EdgeInsets.only(top: 8),
+              child: Text(tr('No longer available · please remove'), style: Txt.ui(12, color: Brand.danger, weight: FontWeight.w700)),
             )
           else if (q != null && !q.available)
             Padding(
-              padding: const EdgeInsets.only(top: 8),
+              padding: EdgeInsets.only(top: 8),
               child: Text(
-                q.maxQty == 0 ? 'Out of stock · switch to an alternative' : 'Only ${q.maxQty} available',
+                q.maxQty == 0 ? tr('Out of stock · switch to an alternative') : tr('Only {n} available', {'n': q.maxQty}),
                 style: Txt.ui(12, weight: FontWeight.w700, color: Brand.danger),
               ),
             ),
           if (q?.cheaper case final c?)
             Container(
-              margin: const EdgeInsets.only(top: 12),
-              padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+              margin: EdgeInsets.only(top: 12),
+              padding: EdgeInsets.fromLTRB(12, 10, 8, 10),
               decoration: BoxDecoration(color: Brand.c50, borderRadius: BorderRadius.circular(16), border: Border.all(color: Brand.c100)),
               child: Row(children: [
-                const Icon(Icons.trending_down_rounded, size: 20, color: Brand.c700),
-                const SizedBox(width: 8),
+                Icon(Icons.trending_down_rounded, size: 20, color: Brand.c700),
+                SizedBox(width: 8),
                 Expanded(
                   child: InkWell(
                     onTap: () => openMedicine(context, c.medicineId),
@@ -339,12 +340,12 @@ class _CartLineCard extends StatelessWidget {
                     style: TextButton.styleFrom(
                       backgroundColor: Brand.c600,
                       foregroundColor: Colors.white,
-                      minimumSize: const Size(0, 34),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      shape: const StadiumBorder(),
+                      minimumSize: Size(0, 34),
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      shape: StadiumBorder(),
                     ),
                     onPressed: () => onSwitch(q!),
-                    child: Text('Switch', style: Txt.ui(13, weight: FontWeight.w800, color: Colors.white)),
+                    child: Text(tr('Switch'), style: Txt.ui(13, weight: FontWeight.w800, color: Colors.white)),
                   ),
               ]),
             ),
@@ -375,11 +376,11 @@ class _Banner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: const Color(0xFFFFEFEA), borderRadius: BorderRadius.circular(16)),
+        padding: EdgeInsets.all(14),
+        decoration: BoxDecoration(color: Color(0xFFFFEFEA), borderRadius: BorderRadius.circular(16)),
         child: Row(children: [
-          const Icon(Icons.error_outline_rounded, size: 20, color: Brand.danger),
-          const SizedBox(width: 10),
+          Icon(Icons.error_outline_rounded, size: 20, color: Brand.danger),
+          SizedBox(width: 10),
           Expanded(child: Text(text, style: Txt.ui(14, color: Brand.danger, weight: FontWeight.w600))),
         ]),
       );
@@ -475,7 +476,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Future<void> _submit() async {
     setState(() => _error = null);
     if (!_form.currentState!.validate()) {
-      setState(() => _error = 'Please check the highlighted fields.');
+      setState(() => _error = tr('Please check the highlighted fields.'));
       return;
     }
     final cart = context.read<CartModel>();
@@ -512,7 +513,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       );
     } on ApiException catch (e) {
       setState(() => _error = e.message);
-      _scroll.animateTo(0, duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
+      _scroll.animateTo(0, duration: Duration(milliseconds: 250), curve: Curves.easeOut);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -524,32 +525,32 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final auth = context.watch<AuthModel>();
     final q = _quote;
     return Scaffold(
-      appBar: AppBar(title: const Text('Checkout')),
+      appBar: AppBar(title: Text(tr('Checkout'))),
       body: meta == null
-          ? (_error != null ? ErrorView(_error!) : const SkeletonList())
+          ? (_error != null ? ErrorView(_error!) : SkeletonList())
           : Form(
               key: _form,
-              child: ListView(controller: _scroll, padding: const EdgeInsets.fromLTRB(20, 4, 20, 24), children: [
-                if (_error != null) Padding(padding: const EdgeInsets.only(bottom: 14), child: _Banner.error(_error!)),
+              child: ListView(controller: _scroll, padding: EdgeInsets.fromLTRB(20, 4, 20, 24), children: [
+                if (_error != null) Padding(padding: EdgeInsets.only(bottom: 14), child: _Banner.error(_error!)),
                 if (!auth.signedIn)
                   Panel(
-                    padding: const EdgeInsets.fromLTRB(18, 8, 8, 8),
+                    padding: EdgeInsets.fromLTRB(18, 8, 8, 8),
                     child: Row(children: [
-                      const Icon(Icons.person_outline_rounded, color: Brand.c600),
-                      const SizedBox(width: 10),
-                      Expanded(child: Text('Checking out as a guest', style: Txt.ui(14, weight: FontWeight.w700))),
+                      Icon(Icons.person_outline_rounded, color: Brand.c600),
+                      SizedBox(width: 10),
+                      Expanded(child: Text(tr('Checking out as a guest'), style: Txt.ui(14, weight: FontWeight.w700))),
                       TextButton(
                         onPressed: () async {
-                          await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LoginScreen()));
+                          await Navigator.of(context).push(MaterialPageRoute(builder: (_) => LoginScreen()));
                           if (mounted) _prefill();
                         },
-                        child: const Text('Sign in'),
+                        child: Text(tr('Sign in')),
                       ),
                     ]),
                   ),
-                if (!auth.signedIn) const SizedBox(height: 18),
+                if (!auth.signedIn) SizedBox(height: 18),
                 if (_addresses.isNotEmpty) ...[
-                  const _Step(1, 'Saved addresses'),
+                  _Step(1, tr('Saved addresses')),
                   ListPanel(children: [
                     for (final a in _addresses)
                       RadioListTile<int?>(
@@ -567,52 +568,52 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       groupValue: _addressId,
                       // ignore: deprecated_member_use
                       onChanged: (_) => setState(() => _addressId = null),
-                      title: const Text('Use a new address'),
+                      title: Text(tr('Use a new address')),
                     ),
                   ]),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                 ],
-                _Step(_addresses.isEmpty ? 1 : 2, 'Delivery details'),
+                _Step(_addresses.isEmpty ? 1 : 2, tr('Delivery details')),
                 Panel(
                   child: Column(children: [
                     TextFormField(
                       controller: _name,
                       textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(labelText: 'Recipient name', prefixIcon: Icon(Icons.person_outline_rounded)),
+                      decoration: InputDecoration(labelText: tr('Recipient name'), prefixIcon: Icon(Icons.person_outline_rounded)),
                       validator: (v) => _required(v, 2, "Please enter the recipient's name"),
                       onChanged: (_) => _addressId = null,
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     TextFormField(
                       controller: _phone,
                       keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                          labelText: 'Mobile number', hintText: '01XXXXXXXXX', prefixIcon: Icon(Icons.phone_outlined)),
+                      decoration: InputDecoration(
+                          labelText: tr('Mobile number'), hintText: tr('01XXXXXXXXX'), prefixIcon: Icon(Icons.phone_outlined)),
                       validator: (v) =>
-                          bdPhone.hasMatch(normalizePhone(v ?? '')) ? null : 'Enter a valid Bangladeshi mobile number (01XXXXXXXXX)',
+                          bdPhone.hasMatch(normalizePhone(v ?? '')) ? null : tr('Enter a valid Bangladeshi mobile number (01XXXXXXXXX)'),
                       onChanged: (_) => _addressId = null,
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     TextFormField(
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       autocorrect: false,
                       readOnly: auth.signedIn,
                       decoration: InputDecoration(
-                          labelText: auth.signedIn ? 'Email' : 'Email (optional)', prefixIcon: const Icon(Icons.mail_outline_rounded)),
+                          labelText: auth.signedIn ? tr('Email') : tr('Email (optional)'), prefixIcon: Icon(Icons.mail_outline_rounded)),
                       validator: (v) {
                         final s = (v ?? '').trim();
-                        if (s.isEmpty) return _createAccount && !auth.signedIn ? 'Email is needed to create an account' : null;
-                        return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(s) ? null : 'Enter a valid email';
+                        if (s.isEmpty) return _createAccount && !auth.signedIn ? tr('Email is needed to create an account') : null;
+                        return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(s) ? null : tr('Enter a valid email');
                       },
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     PickerField(
-                      label: 'Division',
+                      label: tr('Division'),
                       icon: Icons.map_outlined,
                       options: meta.divisions.keys.toList(),
                       value: _division,
-                      errorText: 'Choose a division',
+                      errorText: tr('Choose a division'),
                       onChanged: (v) => setState(() {
                         _division = v;
                         _district = null;
@@ -620,14 +621,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         _addressId = null;
                       }),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     PickerField(
-                      label: 'District',
+                      label: tr('District'),
                       icon: Icons.location_city_outlined,
-                      options: meta.divisions[_division] ?? const <String>[],
+                      options: meta.divisions[_division] ?? <String>[],
                       value: _district,
                       enabled: _division != null,
-                      errorText: 'Choose a district',
+                      errorText: tr('Choose a district'),
                       onChanged: (v) {
                         setState(() {
                           _district = v;
@@ -637,21 +638,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         _requote();
                       },
                     ),
-                    const SizedBox(height: 12),
-                    ThanaField(thanas: meta.thanas[_district] ?? const [], controller: _area, onChanged: () => _addressId = null),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
+                    ThanaField(thanas: meta.thanas[_district] ?? [], controller: _area, onChanged: () => _addressId = null),
+                    SizedBox(height: 12),
                     TextFormField(
                       controller: _line,
-                      decoration: const InputDecoration(labelText: 'House, road, landmark', prefixIcon: Icon(Icons.home_outlined)),
-                      validator: (v) => _required(v, 4, 'Enter house, road and other details'),
+                      decoration: InputDecoration(labelText: tr('House, road, landmark'), prefixIcon: Icon(Icons.home_outlined)),
+                      validator: (v) => _required(v, 4, tr('Enter house, road and other details')),
                       onChanged: (_) => _addressId = null,
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     TextFormField(
                       controller: _note,
                       maxLength: 500,
                       maxLines: 2,
-                      decoration: const InputDecoration(labelText: 'Note for delivery (optional)', prefixIcon: Icon(Icons.edit_note_rounded)),
+                      decoration: InputDecoration(labelText: tr('Note for delivery (optional)'), prefixIcon: Icon(Icons.edit_note_rounded)),
                     ),
                     if (auth.signedIn && _addressId == null)
                       CheckboxListTile(
@@ -659,12 +660,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         controlAffinity: ListTileControlAffinity.leading,
                         value: _saveAddress,
                         onChanged: (v) => setState(() => _saveAddress = v ?? false),
-                        title: const Text('Save this address'),
+                        title: Text(tr('Save this address')),
                       ),
                   ]),
                 ),
-                const SizedBox(height: 20),
-                _Step(_addresses.isEmpty ? 2 : 3, 'Payment'),
+                SizedBox(height: 20),
+                _Step(_addresses.isEmpty ? 2 : 3, tr('Payment')),
                 ListPanel(children: [
                   for (final p in meta.paymentMethods)
                     RadioListTile<String>(
@@ -680,42 +681,42 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                 ]),
                 if (!auth.signedIn) ...[
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   Panel(
-                    padding: const EdgeInsets.fromLTRB(4, 4, 16, 12),
+                    padding: EdgeInsets.fromLTRB(4, 4, 16, 12),
                     child: Column(children: [
                       CheckboxListTile(
                         controlAffinity: ListTileControlAffinity.leading,
                         value: _createAccount,
                         onChanged: (v) => setState(() => _createAccount = v ?? false),
-                        title: const Text('Create an account'),
-                        subtitle: const Text('Track orders, see your savings and save addresses.'),
+                        title: Text(tr('Create an account')),
+                        subtitle: Text(tr('Track orders, see your savings and save addresses.')),
                       ),
                       if (_createAccount)
                         Padding(
-                          padding: const EdgeInsets.only(left: 12),
+                          padding: EdgeInsets.only(left: 12),
                           child: TextFormField(
                             controller: _password,
                             obscureText: true,
-                            decoration: const InputDecoration(labelText: 'Password (8+ characters)', prefixIcon: Icon(Icons.lock_outline)),
-                            validator: (v) => _createAccount && (v ?? '').length < 8 ? 'Password must be at least 8 characters' : null,
+                            decoration: InputDecoration(labelText: tr('Password (8+ characters)'), prefixIcon: Icon(Icons.lock_outline)),
+                            validator: (v) => _createAccount && (v ?? '').length < 8 ? tr('Password must be at least 8 characters') : null,
                           ),
                         ),
                     ]),
                   ),
                 ],
-                const SizedBox(height: 20),
-                _Step(_addresses.isEmpty ? 3 : 4, 'Review'),
+                SizedBox(height: 20),
+                _Step(_addresses.isEmpty ? 3 : 4, tr('Review')),
                 Panel(
                   child: q == null
-                      ? const Center(child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator()))
+                      ? Center(child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator()))
                       : Column(children: [
                           for (final i in q.items)
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
+                              padding: EdgeInsets.only(bottom: 12),
                               child: Row(children: [
                                 ProductThumb(i.image, size: 44, form: i.description),
-                                const SizedBox(width: 12),
+                                SizedBox(width: 12),
                                 Expanded(
                                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                                     Text('${i.brandName} × ${i.qty}', style: Txt.ui(14, weight: FontWeight.w700)),
@@ -725,16 +726,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 Text(taka(i.lineTotal), style: Txt.ui(14, weight: FontWeight.w700)),
                               ]),
                             ),
-                          const Divider(height: 16),
-                          _SumRow('Subtotal', taka(q.subtotal)),
-                          const SizedBox(height: 8),
-                          _SumRow('Delivery${_district != null ? ' ($_district)' : ''}', q.deliveryFee == 0 ? 'Free' : taka(q.deliveryFee)),
-                          const Divider(height: 24),
-                          _SumRow('Total', taka(q.total), bold: true),
+                          Divider(height: 16),
+                          _SumRow(tr('Subtotal'), taka(q.subtotal)),
+                          SizedBox(height: 8),
+                          _SumRow('${tr('Delivery')}${_district != null ? ' ($_district)' : ''}', q.deliveryFee == 0 ? tr('Free') : taka(q.deliveryFee)),
+                          Divider(height: 24),
+                          _SumRow(tr('Total'), taka(q.total), bold: true),
                         ]),
                 ),
-                const SizedBox(height: 14),
-                const Muted('We will call you to confirm. Prescription upload is available on the website checkout.',
+                SizedBox(height: 14),
+                Muted(tr('We will call you to confirm. Prescription upload is available on the website checkout.'),
                     size: 11, align: TextAlign.center),
               ]),
             ),
@@ -746,11 +747,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 child: FilledButton(
                   onPressed: _submitting ? null : _submit,
                   child: _submitting
-                      ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+                      ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
                       : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                          const Icon(Icons.lock_outline_rounded, size: 18),
-                          const SizedBox(width: 8),
-                          Text('Place order${q != null ? ' · ${taka(q.total)}' : ''}'),
+                          Icon(Icons.lock_outline_rounded, size: 18),
+                          SizedBox(width: 8),
+                          Text('${tr('Place order')}${q != null ? ' · ${taka(q.total)}' : ''}'),
                         ]),
                 ),
               ),
@@ -766,16 +767,16 @@ class _Step extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 10, left: 2),
+        padding: EdgeInsets.only(bottom: 10, left: 2),
         child: Row(children: [
           Container(
             width: 26,
             height: 26,
             alignment: Alignment.center,
-            decoration: const BoxDecoration(color: Brand.night, shape: BoxShape.circle),
+            decoration: BoxDecoration(color: Brand.night, shape: BoxShape.circle),
             child: Text('$n', style: Txt.ui(12, weight: FontWeight.w800, color: Brand.gold2)),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10),
           Text(text, style: Txt.display(20, weight: FontWeight.w600)),
         ]),
       );
@@ -795,14 +796,14 @@ class OrderScreen extends StatelessWidget {
     final device = context.read<DeviceOrders>();
     final phone = this.phone ?? device.phoneFor(code);
     return Scaffold(
-      appBar: AppBar(title: Text(justPlaced ? 'Order placed' : 'Track order')),
+      appBar: AppBar(title: Text(justPlaced ? tr('Order placed') : tr('Track order'))),
       body: Loader<(OrderDetail, double)>(
         load: () async {
           final o = await api.order(code, phone: phone);
           if (phone != null) device.remember(o.code, phone);
           double saved = 0;
           try {
-            final s = await api.savings(phone == null ? const [] : [(code: o.code, phone: phone)]);
+            final s = await api.savings(phone == null ? [] : [(code: o.code, phone: phone)]);
             saved = s.byOrder[o.code] ?? 0;
           } catch (_) {}
           return (o, saved);
@@ -812,20 +813,20 @@ class OrderScreen extends StatelessWidget {
           final supportPhone = context.watch<MetaModel>().meta?.supportPhone;
           return RefreshIndicator(
             onRefresh: reload,
-            child: ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 24), children: [
+            child: ListView(padding: EdgeInsets.fromLTRB(20, 4, 20, 24), children: [
               if (justPlaced) ...[
                 Panel(
                   color: Brand.c50,
                   child: Column(children: [
-                    const Illustration('order_success', height: 170, semanticLabel: 'Happy customer with the parcel'),
-                    const SizedBox(height: 8),
-                    Text('ধন্যবাদ! Thank you', style: Txt.bn(16, color: Brand.c700)),
-                    Text('Order placed', style: Txt.display(30, weight: FontWeight.w600)),
-                    const SizedBox(height: 6),
+                    Illustration('order_success', height: 170, semanticLabel: 'Happy customer with the parcel'),
+                    SizedBox(height: 8),
+                    Text(tr('ধন্যবাদ! Thank you'), style: Txt.bn(16, color: Brand.c700)),
+                    Text(tr('Order placed'), style: Txt.display(30, weight: FontWeight.w600)),
+                    SizedBox(height: 6),
                     Muted("We'll call ${o.phone} to confirm. Keep your order ID handy.", size: 14, align: TextAlign.center),
                   ]),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
               ],
               if (saved >= 1) ...[
                 NightCard(
@@ -833,33 +834,33 @@ class OrderScreen extends StatelessWidget {
                     Container(
                       width: 48,
                       height: 48,
-                      decoration: const BoxDecoration(gradient: Brand.goldGradient, shape: BoxShape.circle),
-                      child: const Icon(Icons.savings_outlined, color: Brand.night),
+                      decoration: BoxDecoration(gradient: Brand.goldGradient, shape: BoxShape.circle),
+                      child: Icon(Icons.savings_outlined, color: Brand.night),
                     ),
-                    const SizedBox(width: 14),
+                    SizedBox(width: 14),
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('YOU SAVED', style: Txt.eyebrow(color: Brand.gold2)),
+                        Text(tr('YOU SAVED'), style: Txt.eyebrow(color: Brand.gold2)),
                         PriceText(saved, size: 28, color: Colors.white),
-                        Text('vs the typical price of the same medicines',
+                        Text(tr('vs the typical price of the same medicines'),
                             style: Txt.ui(12, color: Colors.white.withValues(alpha: 0.7))),
                       ]),
                     ),
                     IconButton(
-                      tooltip: 'Share',
+                      tooltip: tr('Share'),
                       onPressed: () => shareSavings(context, saved),
-                      icon: const Icon(Icons.ios_share_rounded, color: Brand.gold2),
+                      icon: Icon(Icons.ios_share_rounded, color: Brand.gold2),
                     ),
                   ]),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
               ],
               Panel(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Row(children: [
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('ORDER ID', style: Txt.eyebrow(color: Brand.muted)),
+                        Text(tr('ORDER ID'), style: Txt.eyebrow(color: Brand.muted)),
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: Alignment.centerLeft,
@@ -868,36 +869,36 @@ class OrderScreen extends StatelessWidget {
                       ]),
                     ),
                     IconButton(
-                      tooltip: 'Copy order ID',
+                      tooltip: tr('Copy order ID'),
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: o.code));
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Order ID copied')));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Order ID copied'))));
                       },
-                      icon: const Icon(Icons.copy_rounded, size: 20),
+                      icon: Icon(Icons.copy_rounded, size: 20),
                     ),
                     StatusBadge(o.status),
                   ]),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Muted('Placed ${formatDate(o.createdAt)}'),
-                  const SizedBox(height: 18),
+                  SizedBox(height: 18),
                   StatusTimeline(o.status, events: o.events),
                   if (o.riderName != null || o.trackingNote != null) ...[
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     _RiderBox(o),
                   ],
                 ]),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Panel(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Items', style: Txt.display(20, weight: FontWeight.w600)),
-                  const SizedBox(height: 14),
+                  Text(tr('Items'), style: Txt.display(20, weight: FontWeight.w600)),
+                  SizedBox(height: 14),
                   for (final i in o.items)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
+                      padding: EdgeInsets.only(bottom: 12),
                       child: Row(children: [
                         ProductThumb(i.image, size: 46, form: i.description),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12),
                         Expanded(
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             Text('${i.brandName} × ${i.qty}', style: Txt.ui(14, weight: FontWeight.w700)),
@@ -907,26 +908,26 @@ class OrderScreen extends StatelessWidget {
                         Text(taka(i.unitPrice * i.qty), style: Txt.ui(14, weight: FontWeight.w700)),
                       ]),
                     ),
-                  const Divider(height: 16),
-                  _SumRow('Subtotal', taka(o.subtotal)),
-                  const SizedBox(height: 8),
-                  _SumRow('Delivery', o.deliveryFee == 0 ? 'Free' : taka(o.deliveryFee)),
-                  const Divider(height: 24),
-                  _SumRow('Total', taka(o.total), bold: true),
+                  Divider(height: 16),
+                  _SumRow(tr('Subtotal'), taka(o.subtotal)),
+                  SizedBox(height: 8),
+                  _SumRow(tr('Delivery'), o.deliveryFee == 0 ? tr('Free') : taka(o.deliveryFee)),
+                  Divider(height: 24),
+                  _SumRow(tr('Total'), taka(o.total), bold: true),
                 ]),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Panel(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Delivery', style: Txt.display(20, weight: FontWeight.w600)),
-                  const SizedBox(height: 8),
+                  Text(tr('Delivery'), style: Txt.display(20, weight: FontWeight.w600)),
+                  SizedBox(height: 8),
                   Text(o.name, style: Txt.ui(15, weight: FontWeight.w700)),
                   Muted(o.phone, size: 14),
                   Muted(o.address, size: 14),
-                  if (o.note != null) ...[const SizedBox(height: 4), Muted('Note: ${o.note}', size: 14)],
-                  const Divider(height: 26),
-                  Text('Payment', style: Txt.display(20, weight: FontWeight.w600)),
-                  const SizedBox(height: 4),
+                  if (o.note != null) ...[SizedBox(height: 4), Muted('Note: ${o.note}', size: 14)],
+                  Divider(height: 26),
+                  Text(tr('Payment'), style: Txt.display(20, weight: FontWeight.w600)),
+                  SizedBox(height: 4),
                   Muted(
                     '${context.read<MetaModel>().meta?.paymentMethods.where((p) => p.id == o.paymentMethod).firstOrNull?.label ?? o.paymentMethod.toUpperCase()} · ${o.paymentStatus}',
                     size: 14,
@@ -934,21 +935,21 @@ class OrderScreen extends StatelessWidget {
                 ]),
               ),
               if (supportPhone != null) ...[
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 OutlinedButton.icon(
                   onPressed: () => callNumber(context, supportPhone),
-                  icon: const Icon(Icons.support_agent_rounded),
-                  label: const Text('Talk to a pharmacist'),
+                  icon: Icon(Icons.support_agent_rounded),
+                  label: Text(tr('Talk to a pharmacist')),
                 ),
               ],
               if (justPlaced) ...[
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 FilledButton(
                   onPressed: () {
                     Navigator.of(context).popUntil((r) => r.isFirst);
                     context.read<TabsModel>().go(TabsModel.home);
                   },
-                  child: const Text('Continue shopping'),
+                  child: Text(tr('Continue shopping')),
                 ),
               ],
             ]),
@@ -961,10 +962,10 @@ class OrderScreen extends StatelessWidget {
 
 /// Customer-facing status names ("shipped" reads as "Out for delivery", as on the web).
 String statusLabel(String s) => switch (s) {
-      'placed' => 'Order placed',
-      'shipped' => 'Out for delivery',
+      'placed' => tr('Order placed'),
+      'shipped' => tr('Out for delivery'),
       '' => '',
-      _ => s[0].toUpperCase() + s.substring(1),
+      _ => tr(s[0].toUpperCase() + s.substring(1)),
     };
 
 class _RiderBox extends StatelessWidget {
@@ -974,16 +975,16 @@ class _RiderBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(14),
         decoration: BoxDecoration(color: Brand.c50, borderRadius: BorderRadius.circular(18)),
         child: Row(children: [
           Container(
             width: 44,
             height: 44,
-            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-            child: const Icon(Icons.delivery_dining_rounded, color: Brand.c600),
+            decoration: BoxDecoration(color: Brand.surface, shape: BoxShape.circle),
+            child: Icon(Icons.delivery_dining_rounded, color: Brand.c600),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               if (o.riderName != null) Text('${o.riderName} is bringing your order', style: Txt.ui(14, weight: FontWeight.w800)),
@@ -996,7 +997,7 @@ class _RiderBox extends StatelessWidget {
               tooltip: 'Call ${o.riderName ?? 'rider'}',
               style: IconButton.styleFrom(backgroundColor: Brand.c600),
               onPressed: () => callNumber(context, o.riderPhone!),
-              icon: const Icon(Icons.call_rounded, color: Colors.white),
+              icon: Icon(Icons.call_rounded, color: Colors.white),
             ),
         ]),
       );
@@ -1010,12 +1011,12 @@ class StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg) = switch (status) {
       'delivered' => (Brand.c100, Brand.c700),
-      'cancelled' => (const Color(0xFFFFE9E3), Brand.danger),
-      'shipped' => (const Color(0xFFE3EDFF), const Color(0xFF1D4ED8)),
+      'cancelled' => (Color(0xFFFFE9E3), Brand.danger),
+      'shipped' => (Color(0xFFE3EDFF), Color(0xFF1D4ED8)),
       _ => (Brand.goldBg, Brand.goldDeep),
     };
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(99)),
       child: Text(statusLabel(status), style: Txt.ui(12, weight: FontWeight.w800, color: fg)),
     );
@@ -1040,13 +1041,13 @@ class StatusTimeline extends StatelessWidget {
     if (status == 'cancelled') {
       final e = events.where((e) => e.status == 'cancelled').firstOrNull;
       return Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: const Color(0xFFFFEFEA), borderRadius: BorderRadius.circular(16)),
+        padding: EdgeInsets.all(14),
+        decoration: BoxDecoration(color: Color(0xFFFFEFEA), borderRadius: BorderRadius.circular(16)),
         child: Row(children: [
-          const Icon(Icons.cancel_outlined, color: Brand.danger),
-          const SizedBox(width: 10),
+          Icon(Icons.cancel_outlined, color: Brand.danger),
+          SizedBox(width: 10),
           Expanded(
-            child: Text('This order was cancelled${e?.note != null ? ': ${e!.note}' : '.'}',
+            child: Text(e?.note != null ? tr('This order was cancelled: {note}', {'note': e!.note!}) : tr('This order was cancelled.'),
                 style: Txt.ui(14, weight: FontWeight.w700, color: Brand.danger)),
           ),
         ]),
@@ -1062,22 +1063,22 @@ class StatusTimeline extends StatelessWidget {
               width: 40,
               child: Column(children: [
                 AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
+                  duration: Duration(milliseconds: 300),
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: i <= idx ? Brand.c600 : Colors.white,
+                    color: i <= idx ? Brand.c600 : Brand.surface,
                     border: Border.all(color: i <= idx ? Brand.c600 : Brand.line, width: 2),
                     boxShadow: i == idx ? [BoxShadow(color: Brand.c600.withValues(alpha: 0.35), blurRadius: 12)] : null,
                   ),
                   child: Icon(icon, size: 18, color: i <= idx ? Colors.white : Brand.muted),
                 ),
                 if (i < steps.length - 1)
-                  Expanded(child: Container(width: 2, margin: const EdgeInsets.symmetric(vertical: 2), color: i < idx ? Brand.c600 : Brand.line)),
+                  Expanded(child: Container(width: 2, margin: EdgeInsets.symmetric(vertical: 2), color: i < idx ? Brand.c600 : Brand.line)),
               ]),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.only(top: 6, bottom: i < steps.length - 1 ? 18 : 0),
@@ -1089,7 +1090,7 @@ class StatusTimeline extends StatelessWidget {
                     ),
                     if (at[s] != null) Text(formatShort(at[s]!), style: Txt.ui(11, color: Brand.muted, weight: FontWeight.w600)),
                   ]),
-                  if (i <= idx) Muted(detail, size: 13),
+                  if (i <= idx) Muted(tr(detail), size: 13),
                 ]),
               ),
             ),
@@ -1120,7 +1121,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   void _load() {
     final auth = context.read<AuthModel>();
-    _account = auth.signedIn ? context.read<Api>().orders() : Future.value(const []);
+    _account = auth.signedIn ? context.read<Api>().orders() : Future.value([]);
   }
 
   @override
@@ -1129,7 +1130,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     final device = context.watch<DeviceOrders>();
     final savings = context.watch<SavingsModel>().savings;
     return Scaffold(
-      appBar: AppBar(title: const Text('Orders')),
+      appBar: AppBar(title: Text(tr('Orders'))),
       body: RefreshIndicator(
         onRefresh: () async {
           setState(_load);
@@ -1138,88 +1139,88 @@ class _OrdersScreenState extends State<OrdersScreen> {
         child: FutureBuilder<List<OrderSummary>>(
           future: _account,
           builder: (context, snap) {
-            final account = snap.data ?? const <OrderSummary>[];
+            final account = snap.data ?? <OrderSummary>[];
             final accountCodes = {for (final o in account) o.code};
             final guest = device.orders.where((o) => !accountCodes.contains(o.code)).toList();
             final empty = account.isEmpty && guest.isEmpty;
-            return ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 120), children: [
+            return ListView(padding: EdgeInsets.fromLTRB(20, 4, 20, 120), children: [
               if (savings.total >= 1) ...[
                 NightCard(
                   child: Row(children: [
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('TOTAL SAVED', style: Txt.eyebrow(color: Brand.gold2)),
+                        Text(tr('TOTAL SAVED'), style: Txt.eyebrow(color: Brand.gold2)),
                         PriceText(savings.total, size: 30, color: Colors.white),
                       ]),
                     ),
                     TextButton.icon(
                       onPressed: () => shareSavings(context, savings.total),
                       style: TextButton.styleFrom(foregroundColor: Brand.gold2),
-                      icon: const Icon(Icons.ios_share_rounded, size: 18),
-                      label: const Text('Share'),
+                      icon: Icon(Icons.ios_share_rounded, size: 18),
+                      label: Text(tr('Share')),
                     ),
                   ]),
                 ),
-                const SizedBox(height: 18),
+                SizedBox(height: 18),
               ],
               if (snap.connectionState == ConnectionState.waiting)
-                const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
+                Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
               else if (empty)
                 Panel(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(24),
                   child: Column(children: [
-                    const Illustration('welcome_delivery', height: 150),
-                    const SizedBox(height: 10),
-                    Text('No orders yet', style: Txt.display(22, weight: FontWeight.w600)),
-                    const SizedBox(height: 4),
-                    const Muted('Orders you place appear here with a live tracker.', align: TextAlign.center, size: 14),
+                    Illustration('welcome_delivery', height: 150),
+                    SizedBox(height: 10),
+                    Text(tr('No orders yet'), style: Txt.display(22, weight: FontWeight.w600)),
+                    SizedBox(height: 4),
+                    Muted(tr('Orders you place appear here with a live tracker.'), align: TextAlign.center, size: 14),
                   ]),
                 )
               else ...[
                 if (account.isNotEmpty) ...[
-                  const SectionHeader('My orders'),
+                  SectionHeader(tr('My orders')),
                   ListPanel(children: [
                     for (final o in account)
                       ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        leading: const _OrderIcon(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        leading: _OrderIcon(),
                         title: Text(o.code, style: Txt.ui(15, weight: FontWeight.w800, spacing: 0.5)),
                         subtitle: Text(
-                            '${formatDate(o.createdAt, time: false)} · ${o.itemCount} item${o.itemCount == 1 ? '' : 's'} · ${taka(o.total)}'),
+                            '${formatDate(o.createdAt, time: false)} · ${o.itemCount} item${o.itemCount == 1 ? tr('') : tr('s')} · ${taka(o.total)}'),
                         trailing: StatusBadge(o.status),
                         onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => OrderScreen(code: o.code))),
                       ),
                   ]),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                 ],
                 if (guest.isNotEmpty) ...[
-                  const SectionHeader('On this phone'),
+                  SectionHeader(tr('On this phone')),
                   ListPanel(children: [
                     for (final o in guest)
                       ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        leading: const _OrderIcon(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        leading: _OrderIcon(),
                         title: Text(o.code, style: Txt.ui(15, weight: FontWeight.w800, spacing: 0.5)),
                         subtitle: Text(o.phone),
-                        trailing: const Icon(Icons.chevron_right_rounded),
+                        trailing: Icon(Icons.chevron_right_rounded),
                         onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => OrderScreen(code: o.code, phone: o.phone))),
                       ),
                   ]),
                 ],
               ],
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               Panel(
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TrackScreen())),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => TrackScreen())),
                 child: Row(children: [
-                  const _OrderIcon(icon: Icons.manage_search_rounded),
-                  const SizedBox(width: 14),
+                  _OrderIcon(icon: Icons.manage_search_rounded),
+                  SizedBox(width: 14),
                   Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('Track another order', style: Txt.ui(15, weight: FontWeight.w800)),
-                      const Muted('Use the order ID and mobile number', size: 13),
+                      Text(tr('Track another order'), style: Txt.ui(15, weight: FontWeight.w800)),
+                      Muted(tr('Use the order ID and mobile number'), size: 13),
                     ]),
                   ),
-                  const Icon(Icons.chevron_right_rounded),
+                  Icon(Icons.chevron_right_rounded),
                 ]),
               ),
             ]);
@@ -1288,30 +1289,30 @@ class _TrackScreenState extends State<TrackScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Track an order')),
+        appBar: AppBar(title: Text(tr('Track an order'))),
         body: Form(
           key: _form,
-          child: ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 120), children: [
-            const Center(child: Illustration('welcome_delivery', height: 170)),
-            const SizedBox(height: 16),
-            if (_error != null) Padding(padding: const EdgeInsets.only(bottom: 12), child: _Banner.error(_error!)),
+          child: ListView(padding: EdgeInsets.fromLTRB(20, 4, 20, 120), children: [
+            Center(child: Illustration('welcome_delivery', height: 170)),
+            SizedBox(height: 16),
+            if (_error != null) Padding(padding: EdgeInsets.only(bottom: 12), child: _Banner.error(_error!)),
             Panel(
               child: Column(children: [
                 TextFormField(
                   controller: _code,
                   textCapitalization: TextCapitalization.characters,
-                  decoration: const InputDecoration(labelText: 'Order ID', hintText: 'MCXXXXXXXXXX', prefixIcon: Icon(Icons.tag_rounded)),
-                  validator: (v) => (v ?? '').trim().length < 4 ? 'Enter your order ID' : null,
+                  decoration: InputDecoration(labelText: tr('Order ID'), hintText: tr('MCXXXXXXXXXX'), prefixIcon: Icon(Icons.tag_rounded)),
+                  validator: (v) => (v ?? '').trim().length < 4 ? tr('Enter your order ID') : null,
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 TextFormField(
                   controller: _phone,
                   keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(labelText: 'Mobile number used for the order', prefixIcon: Icon(Icons.phone_outlined)),
-                  validator: (v) => bdPhone.hasMatch(normalizePhone(v ?? '')) ? null : 'Enter a valid mobile number',
+                  decoration: InputDecoration(labelText: tr('Mobile number used for the order'), prefixIcon: Icon(Icons.phone_outlined)),
+                  validator: (v) => bdPhone.hasMatch(normalizePhone(v ?? '')) ? null : tr('Enter a valid mobile number'),
                 ),
-                const SizedBox(height: 18),
-                FilledButton(onPressed: _busy ? null : _track, child: const Text('Track order')),
+                SizedBox(height: 18),
+                FilledButton(onPressed: _busy ? null : _track, child: Text(tr('Track order'))),
               ]),
             ),
           ]),

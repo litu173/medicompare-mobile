@@ -63,6 +63,17 @@ class AuthModel extends ChangeNotifier {
     await _adopt(r.token, r.user);
   }
 
+  Future<void> updateProfile(String name, String phone) async {
+    user = await api.updateProfile(name, phone);
+    notifyListeners();
+  }
+
+  /// Permanently deletes the account on the server, then signs out here.
+  Future<void> deleteAccount() async {
+    await api.deleteAccount();
+    await _clear();
+  }
+
   /// Forgets the session without contacting the server (used when switching servers).
   Future<void> forget() => _clear();
 
@@ -324,6 +335,84 @@ class OnboardingModel extends ChangeNotifier {
   void finish() {
     done = true;
     _prefs?.setBool(_key, true);
+    notifyListeners();
+  }
+}
+
+/// Appearance and language chosen in Settings.
+class SettingsModel extends ChangeNotifier {
+  static const _themeKey = 'theme_mode', _langKey = 'language';
+  SharedPreferences? _prefs;
+
+  /// 'system', 'light' or 'dark'.
+  String theme = 'system';
+
+  /// 'en' or 'bn'.
+  String language = 'en';
+
+  /// Set when a change rebuilds the app, so the new shell reopens Settings where the user was.
+  bool reopenSettings = false;
+
+  Future<void> load() async {
+    _prefs = await SharedPreferences.getInstance();
+    theme = _prefs!.getString(_themeKey) ?? 'system';
+    language = _prefs!.getString(_langKey) ?? 'en';
+  }
+
+  void setTheme(String v) {
+    theme = v;
+    reopenSettings = true;
+    _prefs?.setString(_themeKey, v);
+    notifyListeners();
+  }
+
+  void setLanguage(String v) {
+    language = v;
+    reopenSettings = true;
+    _prefs?.setString(_langKey, v);
+    notifyListeners();
+  }
+}
+
+/// Newer Android build published on GitHub (read from version.json next to the APK).
+class UpdateModel extends ChangeNotifier {
+  static const versionUrl = 'https://github.com/litu173/medicompare-mobile/releases/download/latest-android/version.json';
+  static const apkUrl = 'https://github.com/litu173/medicompare-mobile/releases/download/latest-android/sashroy.apk';
+
+  String currentVersion = '';
+  int currentBuild = 0;
+  String? latestVersion;
+  int latestBuild = 0;
+  String? notes;
+  String downloadUrl = apkUrl;
+  bool checking = false;
+  String? error;
+
+  bool get available => latestBuild > currentBuild && currentBuild > 0;
+
+  Future<void> loadCurrent(String version, String build) async {
+    currentVersion = version;
+    currentBuild = int.tryParse(build) ?? 0;
+  }
+
+  Future<void> check() async {
+    checking = true;
+    error = null;
+    notifyListeners();
+    try {
+      final res = await http
+          .get(Uri.parse('$versionUrl?t=${DateTime.now().millisecondsSinceEpoch}'))
+          .timeout(const Duration(seconds: 10));
+      if (res.statusCode != 200) throw Exception('HTTP ${res.statusCode}');
+      final j = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
+      latestVersion = j['version'] as String?;
+      latestBuild = (j['build'] as num?)?.toInt() ?? 0;
+      notes = j['notes'] as String?;
+      downloadUrl = (j['url'] as String?) ?? apkUrl;
+    } catch (_) {
+      error = 'Could not check for updates. Check your connection.';
+    }
+    checking = false;
     notifyListeners();
   }
 }

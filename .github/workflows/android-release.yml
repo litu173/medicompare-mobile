@@ -1,9 +1,10 @@
 name: Android release APK
 
 # Builds a release APK on every push to main and publishes it to the rolling
-# `latest-android` GitHub Release as `medicompare.apk`, so this link always
-# serves the newest build:
-#   https://github.com/<owner>/<repo>/releases/download/latest-android/medicompare.apk
+# `latest-android` GitHub Release as `sashroy.apk`, plus `version.json` that the
+# app's About screen reads to offer updates:
+#   https://github.com/<owner>/<repo>/releases/download/latest-android/sashroy.apk
+#   https://github.com/<owner>/<repo>/releases/download/latest-android/version.json
 
 on:
   push:
@@ -58,21 +59,28 @@ jobs:
 
       # The build number increases every run so Android accepts the new APK as an update.
       - name: Build APK
-        run: flutter build apk --release --build-number=${{ github.run_number }}
+        run: flutter build apk --release --build-number=${{ github.run_number }} --build-name=1.0.${{ github.run_number }}
 
       - name: Publish to the latest-android release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp build/app/outputs/flutter-apk/app-release.apk medicompare.apk
+          cp build/app/outputs/flutter-apk/app-release.apk sashroy.apk
+          base="https://github.com/${GITHUB_REPOSITORY}/releases/download/latest-android"
+          msg=$(git log -1 --pretty=%s | sed 's/"/\\"/g')
+          cat > version.json <<JSON
+          {"version": "1.0.${{ github.run_number }}", "build": ${{ github.run_number }}, "url": "$base/sashroy.apk", "notes": "$msg", "date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"}
+          JSON
           # Point the rolling tag at this commit.
           git tag -f latest-android
           git push -f origin refs/tags/latest-android
-          notes="Latest Android test build from ${GITHUB_SHA::7} (run #${{ github.run_number }}).
-          Install medicompare.apk, then open Account → Server address and enter your server, e.g. http://192.168.1.20:3000."
+          notes="সাশ্রয় Sashroy for Android, version 1.0.${{ github.run_number }} (${GITHUB_SHA::7}).
+          Install sashroy.apk. The app connects to the live store automatically."
           if gh release view latest-android >/dev/null 2>&1; then
-            gh release edit latest-android --title "Android test build" --notes "$notes" --prerelease
+            gh release edit latest-android --title "Sashroy for Android" --notes "$notes" --prerelease
           else
-            gh release create latest-android --title "Android test build" --notes "$notes" --prerelease --verify-tag
+            gh release create latest-android --title "Sashroy for Android" --notes "$notes" --prerelease --verify-tag
           fi
-          gh release upload latest-android medicompare.apk --clobber
+          gh release upload latest-android sashroy.apk version.json --clobber
+          # The old file name is retired; keep the release to one APK.
+          gh release delete-asset latest-android medicompare.apk --yes || true
