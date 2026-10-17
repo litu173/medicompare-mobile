@@ -1,4 +1,6 @@
-# MediCompare BD — Flutter app (phase 2)
+# সাশ্রয় · Sashroy: Flutter app (Android & iOS)
+
+_Formerly MediCompare BD._
 
 Android and iOS client for the Next.js backend in `../web`. Same screens as the mobile web: Home, Search (grouped
 by equivalence, cheapest first), Product, Generic, Companies, Cart, Checkout (guest or account, COD), Order

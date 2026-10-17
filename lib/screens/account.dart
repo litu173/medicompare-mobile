@@ -264,7 +264,7 @@ class _SignedOut extends StatelessWidget {
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           const Icon(Icons.account_circle_outlined, size: 48, color: Brand.c600),
           const SizedBox(height: 8),
-          const Text('Sign in to MediCompare',
+          const Text('Sign in to Sashroy',
               textAlign: TextAlign.center, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
           const SizedBox(height: 4),
           const Muted('Track orders, save addresses and check out faster. Guest checkout works too.',
@@ -621,7 +621,7 @@ class _ServerSettingsScreenState extends State<ServerSettingsScreen> {
     super.dispose();
   }
 
-  /// Checks that the address answers like a MediCompare server before saving it. Resetting to the built-in
+  /// Checks that the address answers like a Sashroy server before saving it. Resetting to the built-in
   /// default skips the check, since that address (emulator/simulator host) is unreachable from a real phone.
   Future<void> _save(String input, {bool test = true}) async {
     final url = normalizeServerAddress(input);
@@ -638,7 +638,7 @@ class _ServerSettingsScreenState extends State<ServerSettingsScreen> {
       try {
         final res = await http.get(Uri.parse('$url/api/v1/meta')).timeout(const Duration(seconds: 8));
         if (res.statusCode != 200 || !res.body.contains('divisions')) {
-          throw Exception('Reached $url but it did not answer like a MediCompare server (HTTP ${res.statusCode}).');
+          throw Exception('Reached $url but it did not answer like a Sashroy server (HTTP ${res.statusCode}).');
         }
       } catch (e) {
         if (mounted) {
@@ -680,7 +680,7 @@ class _ServerSettingsScreenState extends State<ServerSettingsScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           const Muted(
-            'The MediCompare server this app talks to. To test on a phone, run the website on your computer and enter '
+            'The Sashroy server this app talks to. To test on a phone, run the website on your computer and enter '
             "its address on your Wi-Fi, e.g. http://192.168.1.20:3000 (find the IP in your computer's network settings).",
             size: 14,
           ),

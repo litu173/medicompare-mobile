@@ -72,7 +72,7 @@ class Api {
     try {
       res = await request().timeout(const Duration(seconds: 20));
     } catch (_) {
-      throw ApiException('Could not reach MediCompare. Check your connection and try again.');
+      throw ApiException('Could not reach Sashroy. Check your connection and try again.');
     }
     if (res.statusCode == 204) return null;
     dynamic body;

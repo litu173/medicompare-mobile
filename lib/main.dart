@@ -36,7 +36,7 @@ class MediCompareApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: 'MediCompare BD',
+        title: 'সাশ্রয় Sashroy',
         debugShowCheckedModeBanner: false,
         theme: buildTheme(),
         // A new server address rebuilds the shell so every tab reloads from the new backend.

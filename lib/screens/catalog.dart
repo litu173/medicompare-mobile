@@ -34,8 +34,8 @@ class HomeScreen extends StatelessWidget {
         title: const Row(children: [
           Icon(Icons.medication_rounded, color: Brand.c600),
           SizedBox(width: 6),
-          Text('MediCompare', style: TextStyle(fontWeight: FontWeight.w700)),
-          Text(' BD', style: TextStyle(fontWeight: FontWeight.w700, color: Brand.c600)),
+          Text('সাশ্রয়', style: TextStyle(fontWeight: FontWeight.w700)),
+          Text('  Sashroy', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Brand.c600)),
         ]),
       ),
       body: Loader<HomeData>(
